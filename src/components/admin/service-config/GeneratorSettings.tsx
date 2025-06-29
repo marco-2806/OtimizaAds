@@ -45,7 +45,7 @@ export const GeneratorSettings = () => {
     cacheEnabled: true,
     cacheExpiryHours: 24,
     defaultModel: "",
-    promptTemplate: "Gere 5 anúncios persuasivos para o seguinte produto:\n\nNome do produto: {{productName}}\nDescrição: {{productDescription}}\nPúblico-alvo: {{targetAudience}}\n\nOs anúncios devem ser curtos, persuasivos e incluir emojis estratégicos.\nCada anúncio deve ter um gancho forte, benefícios claros e uma chamada para ação."
+    promptTemplate: "Gere 5 anúncios persuasivos para o seguinte produto:\n\nNome do produto: " + "{{" + "productName" + "}}" + "\nDescrição: " + "{{" + "productDescription" + "}}" + "\nPúblico-alvo: " + "{{" + "targetAudience" + "}}" + "\n\nOs anúncios devem ser curtos, persuasivos e incluir emojis estratégicos.\nCada anúncio deve ter um gancho forte, benefícios claros e uma chamada para ação."
   });
 
   useEffect(() => {
@@ -230,7 +230,7 @@ export const GeneratorSettings = () => {
               rows={5}
             />
             <p className="text-xs text-gray-500 mt-2">
-              Use {{productName}}, {{productDescription}} e {{targetAudience}} como variáveis que serão substituídas
+              Use {"{{"}{"{"}productName{"}}{"}"}, {"{{"}{"{"}productDescription{"}}{"}"} e {"{{"}{"{"}targetAudience{"}}{"}"} como variáveis que serão substituídas
             </p>
           </div>
           
