@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,9 +17,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import type { Json } from "@/integrations/supabase/types";
 
-// Schema para validação do modelo
+// Schema for model validation
 const modelSchema = z.object({
   model_name: z.string().min(1, "Nome do modelo é obrigatório"),
   provider_id: z.string().min(1, "Provedor é obrigatório"),
@@ -41,12 +40,20 @@ const modelSchema = z.object({
 
 type ModelFormData = z.infer<typeof modelSchema>;
 
-// Definição de tipos para a inserção no banco de dados
-type ModelInsertData = {
+// Type definitions for Supabase data
+type Provider = {
+  id: string;
+  display_name: string;
+  provider_name: string;
+  is_active: boolean;
+};
+
+type Model = {
+  id: string;
   model_name: string;
   provider_id: string;
   provider_model_id: string;
-  model_type: "chat" | "completion";
+  model_type: 'chat' | 'completion';
   cost_per_token_input?: number;
   cost_per_token_output?: number;
   max_tokens?: number;
@@ -54,18 +61,24 @@ type ModelInsertData = {
   top_p?: number;
   frequency_penalty?: number;
   presence_penalty?: number;
-  supports_streaming?: boolean;
-  supports_vision?: boolean;
-  is_active?: boolean;
+  supports_streaming: boolean;
+  supports_vision: boolean;
+  is_active: boolean;
+  created_at: string;
+  provider?: Provider;
 };
+
+// Type definition for DB insertion (without relational provider data)
+type ModelInsertData = Omit<Model, 'id' | 'created_at' | 'provider'>;
+
 
 export const ModelManager = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingModel, setEditingModel] = useState<Record<string, unknown> | null>(null);
+  const [editingModel, setEditingModel] = useState<Model | null>(null);
   const queryClient = useQueryClient();
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-  // Inicialização do formulário
+  // Form initialization
   const form = useForm<ModelFormData>({
     resolver: zodResolver(modelSchema),
     defaultValues: {
@@ -86,10 +99,10 @@ export const ModelManager = () => {
     },
   });
 
-  // Buscar modelos
-  const { data: models, isLoading } = useQuery({
+  // Fetch models
+  const { data: models, isLoading } = useQuery<Model[]>({
     queryKey: ["ai-models"],
-    queryFn: async (): Promise<Array<Record<string, unknown>>> => {
+    queryFn: async () => {
       const { data, error } = await supabase
         .from("ai_models")
         .select(`
@@ -103,12 +116,12 @@ export const ModelManager = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data as Model[]) || [];
     },
   });
 
-  // Buscar provedores para o dropdown
-  const { data: providers } = useQuery<Array<Record<string, unknown>>>({
+  // Fetch providers for the dropdown
+  const { data: providers } = useQuery<Provider[]>({
     queryKey: ["provider-configurations"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -118,53 +131,39 @@ export const ModelManager = () => {
         .order("display_name");
 
       if (error) throw error;
-      return data || [];
+      return (data as Provider[]) || [];
     },
   });
 
-  // Função para verificar se o nome do modelo já existe
+  // Function to check if model name already exists
   const checkModelNameExists = (modelName: string, excludeId?: string) => {
     if (!models) return false;
-    return models.some(model => 
-      model.model_name.toLowerCase() === modelName.toLowerCase() && 
+    return models.some(model =>
+      model.model_name.toLowerCase() === modelName.toLowerCase() &&
       model.id !== excludeId
     );
   };
 
-  // Converter valores entre custo por token e custo por milhão
+  // Convert values between per-token and per-million costs
   const convertToPerToken = (perMillion: number) => {
-    return perMillion / 1000000;
+    return perMillion / 1_000_000;
   };
 
   const convertToPerMillion = (perToken: number) => {
-    return perToken * 1000000;
+    return perToken * 1_000_000;
   };
 
-  // Mutação para criar modelo
+  // Mutation to create a model
   const createModelMutation = useMutation({
     mutationFn: async (data: ModelFormData) => {
-      // Verificar se o nome do modelo já existe
-      const modelNameExists = checkModelNameExists(data.model_name);
-      if (modelNameExists) {
+      if (checkModelNameExists(data.model_name)) {
         throw new Error(`Já existe um modelo com o nome "${data.model_name}". Por favor, escolha um nome diferente.`);
       }
 
-      // Converter valores de custo por milhão para custo por token
-      const insertData: ModelInsertData = {
-        model_name: data.model_name,
-        provider_id: data.provider_id,
-        provider_model_id: data.provider_model_id,
-        model_type: data.model_type,
+      const insertData: Omit<ModelInsertData, 'provider_id'> & { provider_id: string } = {
+        ...data,
         cost_per_token_input: convertToPerToken(data.cost_per_token_input || 0),
         cost_per_token_output: convertToPerToken(data.cost_per_token_output || 0),
-        max_tokens: data.max_tokens,
-        temperature: data.temperature,
-        top_p: data.top_p,
-        frequency_penalty: data.frequency_penalty,
-        presence_penalty: data.presence_penalty,
-        supports_streaming: data.supports_streaming,
-        supports_vision: data.supports_vision,
-        is_active: data.is_active,
       };
 
       const { error } = await supabase
@@ -182,7 +181,7 @@ export const ModelManager = () => {
         description: "O modelo foi criado com sucesso.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Erro ao criar modelo",
         description: error.message,
@@ -191,31 +190,19 @@ export const ModelManager = () => {
     },
   });
 
-  // Mutação para atualizar modelo
+  // Mutation to update a model
   const updateModelMutation = useMutation({
     mutationFn: async (data: ModelFormData) => {
-      // Verificar se o nome do modelo já existe (exceto o próprio modelo)
-      const modelNameExists = checkModelNameExists(data.model_name, editingModel?.id);
-      if (modelNameExists) {
+      if (!editingModel) throw new Error("Nenhum modelo selecionado para edição.");
+
+      if (checkModelNameExists(data.model_name, editingModel.id)) {
         throw new Error(`Já existe um modelo com o nome "${data.model_name}". Por favor, escolha um nome diferente.`);
       }
 
-      // Converter valores de custo por milhão para custo por token
-      const updateData: ModelInsertData = {
-        model_name: data.model_name,
-        provider_id: data.provider_id,
-        provider_model_id: data.provider_model_id,
-        model_type: data.model_type,
+      const updateData: Omit<ModelInsertData, 'provider_id'> & { provider_id: string } = {
+        ...data,
         cost_per_token_input: convertToPerToken(data.cost_per_token_input || 0),
         cost_per_token_output: convertToPerToken(data.cost_per_token_output || 0),
-        max_tokens: data.max_tokens,
-        temperature: data.temperature,
-        top_p: data.top_p,
-        frequency_penalty: data.frequency_penalty,
-        presence_penalty: data.presence_penalty,
-        supports_streaming: data.supports_streaming,
-        supports_vision: data.supports_vision,
-        is_active: data.is_active,
       };
 
       const { error } = await supabase
@@ -235,7 +222,7 @@ export const ModelManager = () => {
         description: "O modelo foi atualizado com sucesso.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Erro ao atualizar modelo",
         description: error.message,
@@ -244,34 +231,33 @@ export const ModelManager = () => {
     },
   });
 
-  // Mutação para deletar modelo
+  // Mutation to delete (deactivate) a model
   const deleteModelMutation = useMutation({
-    mutationFn: async (model: Record<string, unknown>) => {
-      // Verificar se o modelo está sendo usado em alguma configuração
+    mutationFn: async (model: Model) => {
       const { data: usages, error: usageError } = await supabase
         .from("ai_configurations")
         .select("id")
         .eq("model_id", model.id);
-      
+
       if (usageError) throw usageError;
-      
+
       if (usages && usages.length > 0) {
         throw new Error(`Este modelo está sendo usado em ${usages.length} configurações e não pode ser excluído.`);
       }
-      
-      // Se não estiver em uso, podemos excluir
+
       const { error } = await supabase
         .from("ai_models")
         .update({ is_active: false })
         .eq("id", model.id);
 
       if (error) throw error;
-      
-      // Registrar no log de auditoria
+
+      // Optional: Audit log
+      const { data: { user } } = await supabase.auth.getUser();
       await supabase.from('audit_logs').insert({
-        admin_user_id: (await supabase.auth.getUser()).data.user?.id,
+        admin_user_id: user?.id,
         action: 'model_deactivated',
-        details: { 
+        details: {
           model_name: model.model_name,
           provider_id: model.provider_id
         }
@@ -285,7 +271,7 @@ export const ModelManager = () => {
       });
       setConfirmDelete(null);
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Erro ao desativar modelo",
         description: error.message,
@@ -295,37 +281,52 @@ export const ModelManager = () => {
     },
   });
 
-  // Manipular edição de modelo
-  const handleEdit = (model: Record<string, unknown>) => {
+  // Handle model editing
+  const handleEdit = (model: Model) => {
     setEditingModel(model);
     form.reset({
-      model_name: String(model.model_name || ''),
-      provider_id: String(model.provider?.id || model.provider_id || ''),
-      provider_model_id: String(model.provider_model_id || ''),
-      model_type: String(model.model_type || 'chat'),
-      // Converter de custo por token para custo por milhão
-      cost_per_token_input: convertToPerMillion(Number(model.cost_per_token_input) || 0),
-      cost_per_token_output: convertToPerMillion(Number(model.cost_per_token_output) || 0),
-      max_tokens: Number(model.max_tokens) || 4096,
-      temperature: Number(model.temperature) || 0.7,
-      top_p: Number(model.top_p) || 0.9,
-      frequency_penalty: Number(model.frequency_penalty) || 0,
-      presence_penalty: Number(model.presence_penalty) || 0,
+      model_name: model.model_name,
+      provider_id: model.provider_id,
+      provider_model_id: model.provider_model_id,
+      model_type: model.model_type,
+      cost_per_token_input: convertToPerMillion(model.cost_per_token_input || 0),
+      cost_per_token_output: convertToPerMillion(model.cost_per_token_output || 0),
+      max_tokens: model.max_tokens || 4096,
+      temperature: model.temperature || 0.7,
+      top_p: model.top_p || 0.9,
+      frequency_penalty: model.frequency_penalty || 0,
+      presence_penalty: model.presence_penalty || 0,
       supports_streaming: model.supports_streaming || false,
       supports_vision: model.supports_vision || false,
-      is_active: model.is_active || true,
+      is_active: model.is_active,
     });
     setIsDialogOpen(true);
   };
 
-  // Manipular criação de modelo
+  // Handle model creation
   const handleCreate = () => {
     setEditingModel(null);
-    form.reset();
+    form.reset({
+      // Reset with default values
+      model_name: "",
+      provider_id: "",
+      provider_model_id: "",
+      model_type: "chat",
+      cost_per_token_input: 0,
+      cost_per_token_output: 0,
+      max_tokens: 4096,
+      temperature: 0.7,
+      top_p: 0.9,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+      supports_streaming: false,
+      supports_vision: false,
+      is_active: true,
+    });
     setIsDialogOpen(true);
   };
 
-  // Submit do formulário
+  // Handle form submission
   const onSubmit = (data: ModelFormData) => {
     if (editingModel) {
       updateModelMutation.mutate(data);
@@ -334,8 +335,8 @@ export const ModelManager = () => {
     }
   };
 
-  // Manipular exclusão de modelo
-  const handleDelete = (model: Record<string, unknown>) => {
+  // Handle model deletion
+  const handleDelete = (model: Model) => {
     setConfirmDelete(model.id);
   };
 
@@ -353,15 +354,17 @@ export const ModelManager = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Gerenciador de Modelos</CardTitle>
-        <CardDescription>
-          Adicionar, editar e configurar modelos de IA disponíveis
-        </CardDescription>
-        <div className="flex justify-end">
-          <Button onClick={handleCreate}>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Modelo
-          </Button>
+        <div className="flex justify-between items-start">
+            <div>
+                <CardTitle>Gerenciador de Modelos</CardTitle>
+                <CardDescription>
+                    Adicionar, editar e configurar modelos de IA disponíveis
+                </CardDescription>
+            </div>
+            <Button onClick={handleCreate}>
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Modelo
+            </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -371,7 +374,7 @@ export const ModelManager = () => {
               <TableHead>Nome do Modelo</TableHead>
               <TableHead>Provedor</TableHead>
               <TableHead>Tipo</TableHead>
-              <TableHead>Temperatura</TableHead>
+              <TableHead>Temp.</TableHead>
               <TableHead>Tokens</TableHead>
               <TableHead>Custo (Input/Output)</TableHead>
               <TableHead>Status</TableHead>
@@ -386,17 +389,18 @@ export const ModelManager = () => {
                 <TableCell>
                   <Badge variant="outline">{model.model_type}</Badge>
                 </TableCell>
-                <TableCell>{model.temperature?.toFixed(1) || "0.7"}</TableCell>
-                <TableCell>{model.max_tokens || "4096"}</TableCell>
+                <TableCell>{model.temperature?.toFixed(1) || "N/A"}</TableCell>
+                <TableCell>{model.max_tokens || "N/A"}</TableCell>
                 <TableCell>
                   <span className="text-xs">
-                    In: ${convertToPerMillion(model.cost_per_token_input || 0).toFixed(2)}/1M / 
+                    In: ${convertToPerMillion(model.cost_per_token_input || 0).toFixed(2)}/1M
+                    <br />
                     Out: ${convertToPerMillion(model.cost_per_token_output || 0).toFixed(2)}/1M
                   </span>
                 </TableCell>
                 <TableCell>
                   {model.is_active ? (
-                    <Badge variant="default">Ativo</Badge>
+                    <Badge>Ativo</Badge>
                   ) : (
                     <Badge variant="secondary">Inativo</Badge>
                   )}
@@ -411,9 +415,10 @@ export const ModelManager = () => {
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="outline"
+                      variant="destructive"
                       size="sm"
                       onClick={() => handleDelete(model)}
+                      disabled={!model.is_active}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -424,7 +429,7 @@ export const ModelManager = () => {
           </TableBody>
         </Table>
 
-        {/* Formulário de Modelo */}
+        {/* Model Form Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
             <DialogHeader>
@@ -440,17 +445,15 @@ export const ModelManager = () => {
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2 flex items-center justify-between mb-2">
-                    <h2 className="text-xl font-semibold">Configurações do Modelo</h2>
-                  </div>
+                <div className="col-span-2 flex items-center justify-between mb-2">
+                  <h2 className="text-xl font-semibold">Configurações do Modelo</h2>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Column 1: Basic Info */}
+                  <div className="space-y-4 border p-4 rounded-md bg-muted/20">
+                    <h3 className="text-md font-medium">Informações Básicas</h3>
                   
-                  {/* Grid com 2 colunas - tablet e desktop, 1 coluna em mobile */}
-                  <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Coluna 1: Informações Básicas */}
-                    <div className="space-y-4 border p-4 rounded-md bg-gray-50">
-                      <h3 className="text-md font-medium">Informações Básicas</h3>
-                    
                     <FormField
                       control={form.control}
                       name="model_name"
@@ -474,9 +477,9 @@ export const ModelManager = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Provedor</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            defaultValue={field.value}
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
                           >
                             <FormControl>
                               <SelectTrigger>
@@ -521,7 +524,7 @@ export const ModelManager = () => {
                           <FormLabel>Tipo do Modelo</FormLabel>
                           <Select
                             onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            value={field.value}
                           >
                             <FormControl>
                               <SelectTrigger>
@@ -539,8 +542,8 @@ export const ModelManager = () => {
                     />
                   </div>
 
-                  {/* Coluna 2: Parâmetros do Modelo */}
-                  <div className="space-y-4 border p-4 rounded-md bg-gray-50">
+                  {/* Column 2: Parameters & Costs */}
+                  <div className="space-y-4 border p-4 rounded-md bg-muted/20">
                     <h3 className="text-md font-medium">Parâmetros e Custos</h3>
 
                     <FormField
@@ -548,7 +551,7 @@ export const ModelManager = () => {
                       name="temperature"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Temperatura: {field.value}</FormLabel>
+                          <FormLabel>Temperatura: {field.value?.toFixed(1)}</FormLabel>
                           <FormControl>
                             <Slider
                               value={[field.value || 0.7]}
@@ -556,7 +559,6 @@ export const ModelManager = () => {
                               max={2}
                               min={0}
                               step={0.1}
-                              className="mt-2"
                             />
                           </FormControl>
                           <FormDescription>
@@ -566,211 +568,135 @@ export const ModelManager = () => {
                         </FormItem>
                       )}
                     />
-
-                    <FormField
+                     <FormField
                       control={form.control}
-                      name="top_p"
+                      name="max_tokens"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Top P: {field.value}</FormLabel>
+                          <FormLabel>Tokens Máximos</FormLabel>
                           <FormControl>
-                            <Slider
-                              value={[field.value || 0.9]}
-                              onValueChange={([value]) => field.onChange(value)}
-                              max={1}
-                              min={0}
-                              step={0.1}
-                              className="mt-2"
+                            <Input
+                              type="number"
+                              placeholder="4096"
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                             />
                           </FormControl>
-                          <FormDescription>
-                            Alternativa à temperatura para controle de criatividade
-                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="max_tokens"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Tokens Máximos</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                placeholder="4096"
-                                {...field}
-                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="frequency_penalty"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Penalidade de Frequência: {field.value}</FormLabel>
-                            <FormControl>
-                              <Slider
-                                value={[field.value || 0]}
-                                onValueChange={([value]) => field.onChange(value)}
-                                max={2}
-                                min={-2}
-                                step={0.1}
-                                className="mt-2"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="presence_penalty"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Penalidade de Presença: {field.value}</FormLabel>
-                            <FormControl>
-                              <Slider
-                                value={[field.value || 0]}
-                                onValueChange={([value]) => field.onChange(value)}
-                                max={2}
-                                min={-2}
-                                step={0.1}
-                                className="mt-2"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>                   
-                    
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="cost_per_token_input"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Custo por 1M Tokens (Entrada)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="0.13"
-                                {...field}
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Custo para 1M tokens de entrada (ex: $0.13)
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                        <FormField
+                            control={form.control}
+                            name="cost_per_token_input"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Custo por 1M Tokens (Entrada)</FormLabel>
+                                    <FormControl>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.13"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="cost_per_token_output"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Custo por 1M Tokens (Saída)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="0.39"
-                                {...field}
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Custo para 1M tokens de saída (ex: $0.39)
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                        <FormField
+                            control={form.control}
+                            name="cost_per_token_output"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Custo por 1M Tokens (Saída)</FormLabel>
+                                    <FormControl>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.39"
+                                        {...field}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="supports_streaming"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Streaming</FormLabel>
-                              <FormDescription>
-                                Suporta respostas em stream
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
+                  
+                    <div className="grid grid-cols-1 gap-4 pt-4">
+                        <FormField
+                            control={form.control}
+                            name="supports_streaming"
+                            render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                <div className="space-y-0.5">
+                                <FormLabel className="text-base">Streaming</FormLabel>
+                                <FormDescription>
+                                    Suporta respostas em stream
+                                </FormDescription>
+                                </div>
+                                <FormControl>
+                                <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
+                                </FormControl>
+                            </FormItem>
+                            )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="supports_vision"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Visão</FormLabel>
-                              <FormDescription>
-                                Suporta processamento de imagens
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
+                        <FormField
+                            control={form.control}
+                            name="supports_vision"
+                            render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                <div className="space-y-0.5">
+                                <FormLabel className="text-base">Visão</FormLabel>
+                                <FormDescription>
+                                    Suporta processamento de imagens
+                                </FormDescription>
+                                </div>
+                                <FormControl>
+                                <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
+                                </FormControl>
+                            </FormItem>
+                            )}
+                        />
+                  
+                        <FormField
+                            control={form.control}
+                            name="is_active"
+                            render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                <div className="space-y-0.5">
+                                <FormLabel className="text-base">Modelo Ativo</FormLabel>
+                                <FormDescription>
+                                    O modelo está disponível para uso
+                                </FormDescription>
+                                </div>
+                                <FormControl>
+                                <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
+                                </FormControl>
+                            </FormItem>
+                            )}
+                        />
                     </div>
-                    
-                    <FormField
-                      control={form.control}
-                      name="is_active"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">Modelo Ativo</FormLabel>
-                            <FormDescription>
-                              O modelo está disponível para uso
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
                   </div>
                 </div>
-                </div>
                 
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-2 pt-4">
                   <Button
                     type="button"
                     variant="outline"
@@ -782,7 +708,9 @@ export const ModelManager = () => {
                     type="submit"
                     disabled={createModelMutation.isPending || updateModelMutation.isPending}
                   >
-                    {editingModel ? "Atualizar" : "Criar"}
+                    {createModelMutation.isPending || updateModelMutation.isPending 
+                      ? "Salvando..." 
+                      : (editingModel ? "Atualizar" : "Criar")}
                   </Button>
                 </div>
               </form>
@@ -791,7 +719,7 @@ export const ModelManager = () => {
         </Dialog>
       </CardContent>
       
-      {/* Diálogo de confirmação para desativação */}
+      {/* Deactivation Confirmation Dialog */}
       <Dialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
         <DialogContent>
           <DialogHeader>
@@ -822,8 +750,8 @@ export const ModelManager = () => {
             <Button variant="outline" onClick={() => setConfirmDelete(null)}>
               Cancelar
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={() => {
                 const model = models?.find(m => m.id === confirmDelete);
                 if (model) {
@@ -839,3 +767,6 @@ export const ModelManager = () => {
       </Dialog>
     </Card>
   );
+};
+
+export default ModelManager;
