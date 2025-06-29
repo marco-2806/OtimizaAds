@@ -34,18 +34,21 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <Link to="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-blue-600 mb-2">OtimizaAds</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8">
+        <div className="text-center mb-2">
+          <Link to="/" className="inline-flex items-center gap-2">
+            <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+              <span className="text-white font-bold text-sm">OA</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-blue-600">OtimizaAds</h1>
           </Link>
-          <p className="text-gray-600">Crie sua conta</p>
+          <p className="text-gray-600 mt-2">Crie sua conta</p>
         </div>
         
         <Card>
-          <CardHeader>
-            <CardTitle>Cadastro</CardTitle>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl">Cadastro</CardTitle>
             <CardDescription>
               Preencha os dados para criar sua conta
             </CardDescription>
@@ -53,7 +56,7 @@ const Register = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="fullName">Nome Completo</Label>
+                <Label htmlFor="fullName" className="text-sm font-medium">Nome Completo</Label>
                 <Input
                   id="fullName"
                   type="text"
@@ -61,11 +64,12 @@ const Register = () => {
                   onChange={(e) => setFullName(e.target.value)}
                   required
                   placeholder="Seu nome completo"
+                  className="mobile-input"
                 />
               </div>
               
               <div>
-                <Label htmlFor="email">E-mail</Label>
+                <Label htmlFor="email" className="text-sm font-medium">E-mail</Label>
                 <Input
                   id="email"
                   type="email"
@@ -73,11 +77,12 @@ const Register = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="seu@email.com"
+                  className="mobile-input"
                 />
               </div>
               
               <div>
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
                 <Input
                   id="password"
                   type="password"
@@ -86,11 +91,12 @@ const Register = () => {
                   required
                   placeholder="••••••••"
                   minLength={6}
+                  className="mobile-input"
                 />
               </div>
               
               <div>
-                <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirmar Senha</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -98,6 +104,7 @@ const Register = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   placeholder="••••••••"
+                  className="mobile-input"
                 />
                 {password !== confirmPassword && confirmPassword && (
                   <p className="text-sm text-red-600 mt-1">As senhas não coincidem</p>
@@ -106,21 +113,21 @@ const Register = () => {
               
               <Button 
                 type="submit" 
-                className="w-full"
+                className="w-full mobile-button"
                 disabled={isLoading || password !== confirmPassword}
               >
                 {isLoading ? "Criando conta..." : "Criar Conta"}
               </Button>
             </form>
             
-            <div className="mt-4 text-center">
+            <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Já tem uma conta?{" "}
                 <Link to="/login" className="text-blue-600 hover:underline">
                   Faça login aqui
                 </Link>
               </p>
-              <Link to="/" className="text-sm text-gray-500 hover:underline mt-2 inline-block">
+              <Link to="/" className="text-sm text-gray-500 hover:underline mt-4 inline-block">
                 ← Voltar ao início
               </Link>
             </div>

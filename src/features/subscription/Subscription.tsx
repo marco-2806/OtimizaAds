@@ -95,31 +95,31 @@ const Subscription = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-8"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Assinatura</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Assinatura</h1>
+        <p className="text-gray-600 mt-1 sm:mt-2">
           Gerencie sua assinatura e veja seu uso atual
         </p>
       </div>
 
       {/* Notification Messages */}
       {showSuccess && (
-        <SuccessNotification onClose={() => setShowSuccess(false)} />
+        <SuccessNotification onClose={() => setShowSuccess(false)} className="animate-in fade-in-50 slide-in-from-top-5" />
       )}
 
       {showCanceled && (
-        <CanceledNotification onClose={() => setShowCanceled(false)} />
+        <CanceledNotification onClose={() => setShowCanceled(false)} className="animate-in fade-in-50 slide-in-from-top-5" />
       )}
 
       {user && userSubscription ? (
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           {/* Current Subscription Status */}
           <SubscriptionDetails
             userSubscription={userSubscription}
@@ -148,19 +148,19 @@ const Subscription = () => {
 };
 
 // Componentes para diferentes estados da assinatura
-const SuccessNotification = ({ onClose }: { onClose: () => void }): JSX.Element => (
-  <Card className="bg-green-50 border-green-200">
-    <CardContent className="p-6">
-      <div className="flex items-start gap-4">
-        <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
+const SuccessNotification = ({ onClose, className = "" }: { onClose: () => void, className?: string }): JSX.Element => (
+  <Card className={`bg-green-50 border-green-200 ${className}`}>
+    <CardContent className="p-4 sm:p-6">
+      <div className="flex items-start gap-3 sm:gap-4">
+        <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 flex-shrink-0 mt-1" />
         <div>
-          <h3 className="font-semibold text-green-800 text-lg">Assinatura realizada com sucesso!</h3>
-          <p className="text-green-700 mt-1">
+          <h3 className="font-semibold text-green-800 text-base sm:text-lg">Assinatura realizada com sucesso!</h3>
+          <p className="text-green-700 mt-1 text-sm sm:text-base">
             Sua assinatura foi processada e está ativa. Você já pode aproveitar todos os benefícios do seu plano.
           </p>
-          <Button 
-            variant="outline" 
-            className="mt-4 bg-white hover:bg-white" 
+          <Button
+            variant="outline"
+            className="mt-3 sm:mt-4 bg-white hover:bg-white touch-target"
             onClick={onClose}
           >
             Fechar
@@ -171,19 +171,19 @@ const SuccessNotification = ({ onClose }: { onClose: () => void }): JSX.Element 
   </Card>
 );
 
-const CanceledNotification = ({ onClose }: { onClose: () => void }) => (
-  <Card className="bg-yellow-50 border-yellow-200">
-    <CardContent className="p-6">
-      <div className="flex items-start gap-4">
-        <AlertTriangle className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-1" />
+const CanceledNotification = ({ onClose, className = "" }: { onClose: () => void, className?: string }) => (
+  <Card className={`bg-yellow-50 border-yellow-200 ${className}`}>
+    <CardContent className="p-4 sm:p-6">
+      <div className="flex items-start gap-3 sm:gap-4">
+        <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600 flex-shrink-0 mt-1" />
         <div>
-          <h3 className="font-semibold text-yellow-800 text-lg">Checkout cancelado</h3>
-          <p className="text-yellow-700 mt-1">
+          <h3 className="font-semibold text-yellow-800 text-base sm:text-lg">Checkout cancelado</h3>
+          <p className="text-yellow-700 mt-1 text-sm sm:text-base">
             Você cancelou o processo de checkout. Se precisar de ajuda ou tiver dúvidas, entre em contato com nosso suporte.
           </p>
-          <Button 
-            variant="outline" 
-            className="mt-4 bg-white hover:bg-white" 
+          <Button
+            variant="outline"
+            className="mt-3 sm:mt-4 bg-white hover:bg-white touch-target"
             onClick={onClose}
           >
             Fechar
@@ -195,12 +195,12 @@ const CanceledNotification = ({ onClose }: { onClose: () => void }) => (
 );
 
 const NoSubscriptionView = ({ user }: { user: User | null }) => (
-  <div className="space-y-8">
-    <div className="text-center">
-      <h1 className="text-3xl font-bold text-gray-900 mb-4">
+  <div className="space-y-6 sm:space-y-8">
+    <div className="text-center mb-4 sm:mb-6">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
         Escolha seu Plano de Assinatura
       </h1>
-      <p className="text-xl text-gray-600">
+      <p className="text-lg sm:text-xl text-gray-600">
         {user ? 
           "Você ainda não tem uma assinatura ativa." :
           "Faça login para gerenciar sua assinatura."

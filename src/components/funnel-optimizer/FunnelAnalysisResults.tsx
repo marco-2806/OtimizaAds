@@ -62,11 +62,11 @@ export const FunnelAnalysisResults = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-medium">Pontuação de Coerência:</span>
-            <span className={`text-2xl font-bold ${getScoreColor(results.funnelCoherenceScore)}`}>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-base sm:text-lg font-medium">Pontuação de Coerência:</span>
+            <span className={`text-xl sm:text-2xl font-bold ${getScoreColor(results.funnelCoherenceScore)}`}>
               {results.funnelCoherenceScore}/10
             </span>
           </div>
@@ -75,7 +75,7 @@ export const FunnelAnalysisResults = ({
           </Badge>
         </div>
         
-        <Button variant="outline" onClick={onReset} className="flex items-center gap-2">
+        <Button variant="outline" onClick={onReset} className="flex items-center gap-2 touch-target">
           <ArrowLeft className="h-4 w-4" />
           Nova Análise
         </Button>
@@ -98,12 +98,12 @@ export const FunnelAnalysisResults = ({
               <Progress value={results.funnelCoherenceScore * 10} className="h-2" />
             </div>
             
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-start gap-2">
                 <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm text-blue-800 font-medium">Impacto na Conversão</p>
-                  <p className="text-sm text-blue-700 mt-1">
+                  <p className="text-xs sm:text-sm text-blue-700 mt-1">
                     {results.funnelCoherenceScore >= 8 
                       ? "Sua coerência de funil está excelente! Isso deve resultar em altas taxas de conversão e menor custo por aquisição."
                       : results.funnelCoherenceScore >= 6
@@ -117,15 +117,15 @@ export const FunnelAnalysisResults = ({
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="diagnosis" className="w-full">
+      <Tabs defaultValue="diagnosis" className="w-full min-h-[400px]">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="diagnosis">Diagnóstico</TabsTrigger>
           <TabsTrigger value="suggestions">Sugestões</TabsTrigger>
           <TabsTrigger value="optimized">Anúncio Otimizado</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="diagnosis" className="space-y-4 mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TabsContent value="diagnosis" className="space-y-4 mt-4 min-h-[400px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -133,9 +133,9 @@ export const FunnelAnalysisResults = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-700">{results.adDiagnosis}</p>
+                <p className="text-sm text-gray-700 leading-relaxed">{results.adDiagnosis}</p>
                 
-                <div className="mt-4 p-3 border rounded-lg bg-gray-50">
+                <div className="mt-4 p-3 border rounded-lg bg-gray-50 max-h-[150px] overflow-y-auto">
                   <h4 className="text-sm font-medium mb-2">Anúncio Original</h4>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{originalAd}</p>
                 </div>
@@ -149,9 +149,9 @@ export const FunnelAnalysisResults = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-700">{results.landingPageDiagnosis}</p>
+                <p className="text-sm text-gray-700 leading-relaxed">{results.landingPageDiagnosis}</p>
                 
-                <div className="mt-4 p-3 border rounded-lg bg-gray-50 max-h-[200px] overflow-y-auto">
+                <div className="mt-4 p-3 border rounded-lg bg-gray-50 max-h-[150px] overflow-y-auto">
                   <h4 className="text-sm font-medium mb-2">Página de Destino</h4>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{originalLandingPage}</p>
                 </div>
@@ -171,7 +171,7 @@ export const FunnelAnalysisResults = ({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <h3 className="text-sm font-medium">Pontos de Alinhamento</h3>
                     <ul className="space-y-1">
@@ -209,7 +209,7 @@ export const FunnelAnalysisResults = ({
           </Card>
         </TabsContent>
         
-        <TabsContent value="suggestions" className="space-y-4 mt-4">
+        <TabsContent value="suggestions" className="space-y-4 mt-4 min-h-[400px]">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -221,14 +221,14 @@ export const FunnelAnalysisResults = ({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-4">
+              <ul className="space-y-3 md:space-y-4">
                 {results.syncSuggestions.map((suggestion, index) => (
-                  <li key={index} className="p-4 border rounded-lg bg-gray-50">
+                  <li key={index} className="p-3 md:p-4 border rounded-lg bg-gray-50">
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-medium">
                         {index + 1}
                       </div>
-                      <p className="text-sm text-gray-700">{suggestion}</p>
+                      <p className="text-sm text-gray-700 leading-relaxed">{suggestion}</p>
                     </div>
                   </li>
                 ))}
@@ -242,10 +242,10 @@ export const FunnelAnalysisResults = ({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-gray-700 leading-relaxed">
                   Para maximizar suas conversões, recomendamos:
                 </p>
-                <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+                <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700 pl-2">
                   <li>Implementar as sugestões de melhoria listadas acima</li>
                   <li>Utilizar o anúncio otimizado fornecido na próxima aba</li>
                   <li>Testar diferentes variações para identificar o que funciona melhor</li>
@@ -256,7 +256,7 @@ export const FunnelAnalysisResults = ({
           </Card>
         </TabsContent>
         
-        <TabsContent value="optimized" className="space-y-4 mt-4">
+        <TabsContent value="optimized" className="space-y-4 mt-4 min-h-[400px]">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -265,7 +265,7 @@ export const FunnelAnalysisResults = ({
                   variant="outline" 
                   size="sm" 
                   onClick={() => copyToClipboard(results.optimizedAd)}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 touch-target"
                 >
                   {copiedAd ? (
                     <>
@@ -285,18 +285,18 @@ export const FunnelAnalysisResults = ({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="p-4 border rounded-lg bg-green-50 border-green-200">
-                <p className="text-sm text-gray-800 whitespace-pre-wrap">{results.optimizedAd}</p>
+              <div className="p-3 sm:p-4 border rounded-lg bg-green-50 border-green-200">
+                <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{results.optimizedAd}</p>
               </div>
               
-              <div className="mt-6 space-y-2">
+              <div className="mt-4 sm:mt-6 space-y-2">
                 <h3 className="font-medium text-gray-900">Por que este anúncio funciona melhor?</h3>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-gray-700 leading-relaxed">
                   Este anúncio foi otimizado para criar uma experiência coerente com sua página de destino. 
                   Ele mantém as promessas alinhadas com o que o usuário encontrará na página, 
                   utiliza linguagem e tom similares, e enfatiza os mesmos benefícios e pontos-chave.
                 </p>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-gray-700 leading-relaxed">
                   A coerência entre anúncio e página de destino não apenas melhora a experiência do usuário, 
                   mas também aumenta a qualidade do anúncio nas plataformas de publicidade, 
                   potencialmente reduzindo seu custo por clique e aumentando as conversões.
@@ -305,8 +305,8 @@ export const FunnelAnalysisResults = ({
             </CardContent>
           </Card>
           
-          <div className="flex justify-between">
-            <Button variant="outline" onClick={onReset}>
+          <div className="flex justify-center sm:justify-between">
+            <Button variant="outline" onClick={onReset} className="touch-target">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Nova Análise
             </Button>

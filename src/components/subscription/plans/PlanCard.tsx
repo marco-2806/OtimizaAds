@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Check, Users, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge"; 
+import { Check, Users, Loader2, CheckCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SubscriptionPlan } from "@/types/subscription";
 import { useAuth } from "@/features/auth";
@@ -85,30 +85,30 @@ const PlanCard = ({
   return (
     <Card 
       className={`relative ${
-        isPopular ? 'border-blue-500 border-2 shadow-lg' : 'border-gray-200'
-      } ${isCurrentPlan ? 'ring-2 ring-green-500' : ''}`}
+        isPopular ? 'border-blue-500 border-2 shadow-lg' : 'border-gray-200 hover:border-gray-300'
+      } ${isCurrentPlan ? 'ring-2 ring-green-500' : ''} transition-all duration-300 h-full flex flex-col`}
     >
       {isPopular && (
-        <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600">
+        <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 shadow-sm">
           Mais Popular
         </Badge>
       )}
       
       {isCurrentPlan && (
-        <Badge className="absolute -top-3 right-4 bg-green-600">
+        <Badge className="absolute -top-3 right-4 bg-green-600 shadow-sm">
           Seu Plano
         </Badge>
       )}
 
-      <CardHeader className="text-center">
-        <CardTitle className="text-xl">{plan.name}</CardTitle>
+      <CardHeader className="text-center pb-4">
+        <CardTitle className="text-xl mb-2">{plan.name}</CardTitle>
         <div className="mt-2">
           <span className="text-3xl font-bold text-gray-900">
             {formatPrice(plan.price_monthly)}
           </span>
           <span className="text-gray-600">/mês</span>
         </div>
-        <CardDescription className="mt-2">
+        <CardDescription className="mt-2 text-sm">
           {plan.name === "Gratuito" && "Perfeito para testar e começar"}
           {plan.name === "Plano Básico" && "Ideal para pequenos negócios"}
           {plan.name === "Intermediário" && "Para quem quer escalar"}
@@ -116,19 +116,19 @@ const PlanCard = ({
         </CardDescription>
       </CardHeader>
 
-      <CardContent>
-        <ul className="space-y-3 mb-6">
+      <CardContent className="flex-1 flex flex-col">
+        <ul className="space-y-2 mb-6 flex-1">
           {features.map((feature, index) => (
-            <li key={index} className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-              <span className="text-sm text-gray-600">{feature}</span>
+            <li key={index} className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-gray-600 leading-tight">{feature}</span>
             </li>
           ))}
         </ul>
 
         <Button
           onClick={() => onSelectPlan(plan)}
-          variant={isCurrentPlan ? "secondary" : isPopular ? "default" : "outline"}
+          variant={isCurrentPlan ? "secondary" : isPopular ? "default" : "outline"} 
           className="w-full"
           size="lg"
           disabled={isButtonLoading || (isCurrentPlan && plan.name !== "Gratuito") || isLoading}
@@ -142,7 +142,7 @@ const PlanCard = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <p className="text-xs text-center mt-2 text-gray-500 cursor-help flex items-center justify-center">
+                <p className="text-xs text-center mt-3 text-gray-500 cursor-help flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="32" height="20" className="mr-1">
                     <path d="M9.17 7.209c0-.438.107-.765.322-.983.214-.218.536-.327.965-.327.43 0 .752.11.966.327.215.218.322.545.322.983 0 .437-.107.764-.322.982-.214.217-.536.326-.966.326-.429 0-.75-.109-.965-.326-.215-.218-.322-.545-.322-.982zm12.56-2.466H8.431v7.496h13.3V4.743z" fill="#32325D"/>
                     <path d="M8.431 12.239h13.3v-2.27l-13.3.001v2.269z" fill="#32325D"/>

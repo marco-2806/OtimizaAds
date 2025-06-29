@@ -27,40 +27,42 @@ const AdGenerationForm = ({
   return (
     <form onSubmit={onGenerate} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="productName">Nome do Produto/Serviço</Label>
+        <Label htmlFor="productName" className="text-sm font-medium">Nome do Produto/Serviço</Label>
         <Input
           id="productName"
           placeholder="Ex: Curso de Marketing Digital"
           value={productName}
           onChange={(e) => setProductName(e.target.value)}
+          className="mobile-input"
           required
         />
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="productDescription">Descrição do Produto</Label>
+        <Label htmlFor="productDescription" className="text-sm font-medium">Descrição do Produto</Label>
         <Textarea
           id="productDescription"
           placeholder="Descreva os principais benefícios, características e diferenciais do seu produto..."
           value={productDescription}
           onChange={(e) => setProductDescription(e.target.value)}
-          rows={4}
+          className="min-h-[120px] resize-none mobile-input"
           required
         />
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="targetAudience">Público-Alvo</Label>
+        <Label htmlFor="targetAudience" className="text-sm font-medium">Público-Alvo</Label>
         <Input
           id="targetAudience"
           placeholder="Ex: Empreendedores iniciantes, Mulheres de 25-40 anos"
           value={targetAudience}
           onChange={(e) => setTargetAudience(e.target.value)}
+          className="mobile-input"
           required
         />
       </div>
       
-      <Button type="submit" className="w-full" disabled={isGenerating}>
+      <Button type="submit" className="w-full touch-target mobile-button" disabled={isGenerating}>
         {isGenerating ? "Gerando anúncios..." : "Gerar Anúncios"}
       </Button>
     </form>

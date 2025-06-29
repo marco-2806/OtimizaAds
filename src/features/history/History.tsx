@@ -7,7 +7,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import HistoryCard from "./components/HistoryCard";
 import HistoryFilters from "./components/HistoryFilters";
 import HistoryModal from "./components/HistoryModal";
-import { Search } from "lucide-react";
+import { Search, History as HistoryIcon } from "lucide-react";
 
 type HistoryItem = Tables<'history_items'>;
 
@@ -143,11 +143,11 @@ const History = () => {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Meu Histórico</h1>
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Meu Histórico</h1>
           <p className="text-gray-600 mt-2">Carregando seus itens...</p>
         </div>
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-8 sm:py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       </div>
@@ -155,10 +155,10 @@ const History = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Meu Histórico</h1>
-        <p className="text-gray-600 mt-2">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Meu Histórico</h1>
+        <p className="text-gray-600 mt-1 sm:mt-2">
           Acesse todos os anúncios gerados e diagnósticos realizados anteriormente
         </p>
       </div>
@@ -179,8 +179,8 @@ const History = () => {
       {filteredAndSortedItems.length > 0 ? (
         <div className={
           viewMode === 'grid' 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" 
-            : "space-y-4"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" 
+            : "space-y-3 sm:space-y-4"
         }>
           {filteredAndSortedItems.map((item) => (
             <HistoryCard
@@ -193,12 +193,14 @@ const History = () => {
           ))}
         </div>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12">
             <div className="text-gray-500 text-center">
-              <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <div className="bg-gray-100 p-4 rounded-full mb-4">
+                <HistoryIcon className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400" />
+              </div>
               <h3 className="text-lg font-medium mb-2">Nenhum item encontrado</h3>
-              <p className="text-sm">
+              <p className="text-sm max-w-md mx-auto">
                 {searchTerm || typeFilter !== "all" ? 
                   "Tente ajustar os filtros de busca" : 
                   "Você ainda não tem itens no histórico. Comece gerando ou analisando anúncios!"

@@ -100,4 +100,43 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Melhorias de acessibilidade para foco */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-blue-600;
+  }
+  
+  /* Melhorias para scrolling suave */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Melhorias para telas touchscreen */
+  @media (hover: none) {
+    button, a {
+      @apply min-h-[44px] min-w-[44px];
+    }
+  }
+}
+
+/* Estilos para melhorar a experiência em dispositivos móveis */
+@layer components {
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Melhorias para formulários em dispositivos móveis */
+  .mobile-input {
+    @apply text-base py-3;
+  }
+  
+  /* Melhorias para botões em dispositivos móveis */
+  .mobile-button {
+    @apply py-3 px-4;
+  }
+  
+  /* Ajustes para espaçamento em telas pequenas */
+  .mobile-spacing {
+    @apply px-4 py-3;
+  }
 }

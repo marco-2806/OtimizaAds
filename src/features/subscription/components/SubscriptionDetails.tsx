@@ -68,9 +68,9 @@ const SubscriptionDetails = ({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2 flex-wrap">
               Sua Assinatura
               <Badge className={getStatusColor(userSubscription.status)}>
                 {getStatusText(userSubscription.status)}
@@ -85,12 +85,12 @@ const SubscriptionDetails = ({
               Gerencie sua assinatura e veja seu uso atual
             </CardDescription>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={onRefresh} variant="outline" size="sm" disabled={loading}>
+          <div className="flex gap-2 self-end sm:self-auto">
+            <Button onClick={onRefresh} variant="outline" size="sm" disabled={loading} className="touch-target">
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Atualizar
             </Button>
-            <Button onClick={onManage} variant="outline" size="sm" disabled={loading}>
+            <Button onClick={onManage} variant="outline" size="sm" disabled={loading} className="touch-target">
               <Settings className="h-4 w-4 mr-2" />
               Gerenciar
             </Button>
@@ -98,10 +98,10 @@ const SubscriptionDetails = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           <div>
             <h3 className="font-semibold text-gray-900">Plano Atual</h3>
-            <p className="text-2xl font-bold text-blue-600">
+            <p className="text-xl sm:text-2xl font-bold text-blue-600">
               {userSubscription.plan?.name || "Plano não encontrado"}
             </p>
             <p className="text-gray-600">
@@ -114,7 +114,7 @@ const SubscriptionDetails = ({
           {userSubscription.current_period_end && (
             <div>
               <h3 className="font-semibold text-gray-900">Próxima Cobrança</h3>
-              <p className="text-lg flex items-center gap-2">
+              <p className="text-base sm:text-lg flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 {formatDate(userSubscription.current_period_end)}
               </p>
@@ -128,9 +128,9 @@ const SubscriptionDetails = ({
           
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">Método de Pagamento</h3>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="flex items-center gap-2"
               onClick={() => setShowPaymentMethod(!showPaymentMethod)}
             >
@@ -139,7 +139,7 @@ const SubscriptionDetails = ({
             </Button>
             
             {showPaymentMethod && (
-              <div className="mt-2 p-3 bg-gray-50 rounded-md">
+              <div className="mt-2 p-3 bg-gray-50 rounded-md animate-in fade-in-50">
                 {userSubscription.status === 'active' ? (
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
@@ -166,10 +166,10 @@ const SubscriptionDetails = ({
 
         {/* Uso do plano */}
         {usageData && (
-          <div className="mt-8">
-            <h3 className="font-semibold text-gray-900 mb-4">Uso do Plano</h3>
-            <div className="space-y-6">
-              <div>
+          <div className="mt-6 sm:mt-8">
+            <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4">Uso do Plano</h3>
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium">Gerações de Anúncios</span>
                   <span className="text-sm text-gray-600">
@@ -187,7 +187,7 @@ const SubscriptionDetails = ({
                 )}
               </div>
               
-              <div>
+              <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-medium">Diagnósticos</span>
                   <span className="text-sm text-gray-600">
@@ -205,9 +205,9 @@ const SubscriptionDetails = ({
 
         {/* Recursos do plano */}
         {userSubscription.plan?.features && (
-          <div className="mt-8">
-            <h3 className="font-semibold text-gray-900 mb-4">Recursos Incluídos</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="mt-6 sm:mt-8">
+            <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4">Recursos Incluídos</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-50 p-3 sm:p-4 rounded-lg">
               {Object.entries(userSubscription.plan.features)
                 .filter(([_, value]) => value === true || (typeof value === 'number' && value > 0) || value === -1 || value === 'all')
                 .map(([key, value]) => {

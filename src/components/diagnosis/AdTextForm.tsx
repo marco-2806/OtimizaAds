@@ -66,16 +66,16 @@ const AdTextForm = ({ adText, setAdText, isAnalyzing, onAnalyze }: AdTextFormPro
   };
 
   return (
-    <Card className="bg-white">
-      <CardHeader className="bg-white text-gray-900">
-        <CardTitle>Texto do Anúncio</CardTitle>
+    <Card className="bg-white h-full">
+      <CardHeader className="bg-white text-gray-900 pb-3">
+        <CardTitle className="text-xl">Texto do Anúncio</CardTitle>
         <CardDescription>
           Cole aqui o texto completo do anúncio que você quer analisar
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-[calc(100%-120px)]">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-2 h-full">
             <Label htmlFor="adText" className="text-gray-700">Texto do Anúncio</Label>
             <Textarea
               id="adText"
@@ -84,8 +84,7 @@ const AdTextForm = ({ adText, setAdText, isAnalyzing, onAnalyze }: AdTextFormPro
               value={adText}
               onChange={handleTextChange}
               onFocus={handleFocus}
-              rows={8}
-              className={`min-h-[200px] bg-white border-gray-300 text-gray-900 ${errorMessage ? 'border-red-500 focus:border-red-500' : ''}`}
+              className={`min-h-[200px] h-full bg-white border-gray-300 text-gray-900 resize-none ${errorMessage ? 'border-red-500 focus:border-red-500' : ''}`}
             />
             <div className="flex justify-between">
               <div className="text-xs text-gray-500">
@@ -99,7 +98,11 @@ const AdTextForm = ({ adText, setAdText, isAnalyzing, onAnalyze }: AdTextFormPro
             </div>
           </div>
           
-          <Button type="submit" className="w-full" disabled={isAnalyzing || !adText.trim() || adText.length > 1000}>
+          <Button 
+            type="submit" 
+            className="w-full touch-target" 
+            disabled={isAnalyzing || !adText.trim() || adText.length > 1000}
+          >
             {isAnalyzing ? "Analisando anúncio..." : "Analisar Anúncio"}
           </Button>
         </form>

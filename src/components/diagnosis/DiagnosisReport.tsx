@@ -31,9 +31,9 @@ const DiagnosisReportComponent = ({ diagnosisReport, isOptimizing, onOptimize }:
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Relatório de Diagnóstico</CardTitle>
+    <Card className="h-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-xl">Relatório de Diagnóstico</CardTitle>
         <CardDescription>
           {diagnosisReport ? 
             "Análise completa do seu anúncio com sugestões de melhoria" : 
@@ -41,13 +41,13 @@ const DiagnosisReportComponent = ({ diagnosisReport, isOptimizing, onOptimize }:
           }
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-[calc(100%-120px)] overflow-y-auto">
         {diagnosisReport ? (
           <div className="space-y-6">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-medium">Pontuação de Clareza</span>
-                <span className={`text-2xl font-bold ${getScoreColor(diagnosisReport.clarityScore)}`}>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
+                <span className="font-medium text-gray-700">Pontuação de Clareza</span>
+                <span className={`text-xl sm:text-2xl font-bold ${getScoreColor(diagnosisReport.clarityScore)}`}>
                   {diagnosisReport.clarityScore}/10
                 </span>
               </div>
@@ -57,18 +57,18 @@ const DiagnosisReportComponent = ({ diagnosisReport, isOptimizing, onOptimize }:
             </div>
 
             <div>
-              <h4 className="font-medium mb-2">Análise do Gancho (Hook)</h4>
-              <p className="text-sm text-gray-600">{diagnosisReport.hookAnalysis}</p>
+              <h4 className="font-medium mb-2 text-gray-800">Análise do Gancho (Hook)</h4>
+              <p className="text-sm text-gray-600 leading-relaxed">{diagnosisReport.hookAnalysis}</p>
             </div>
 
             <div>
-              <h4 className="font-medium mb-2">Análise da Chamada para Ação</h4>
-              <p className="text-sm text-gray-600">{diagnosisReport.ctaAnalysis}</p>
+              <h4 className="font-medium mb-2 text-gray-800">Análise da Chamada para Ação</h4>
+              <p className="text-sm text-gray-600 leading-relaxed">{diagnosisReport.ctaAnalysis}</p>
             </div>
 
             <div>
-              <h4 className="font-medium mb-2">Gatilhos Mentais Sugeridos</h4>
-              <div className="flex flex-wrap gap-2">
+              <h4 className="font-medium mb-2 text-gray-800">Gatilhos Mentais Sugeridos</h4>
+              <div className="flex flex-wrap gap-2 mt-3">
                 {diagnosisReport.mentalTriggers.map((trigger, index) => (
                   <Badge key={index} variant="outline">{trigger}</Badge>
                 ))}
@@ -76,23 +76,27 @@ const DiagnosisReportComponent = ({ diagnosisReport, isOptimizing, onOptimize }:
             </div>
 
             <div>
-              <h4 className="font-medium mb-2">Sugestões de Melhoria</h4>
-              <ul className="text-sm text-gray-600 space-y-1">
+              <h4 className="font-medium mb-2 text-gray-800">Sugestões de Melhoria</h4>
+              <ul className="text-sm text-gray-600 space-y-2">
                 {diagnosisReport.suggestions.map((suggestion, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className="text-blue-600 mr-2">•</span>
-                    {suggestion}
+                  <li key={index} className="flex items-start gap-2">
+                    <span className="text-blue-600 flex-shrink-0">•</span>
+                    <span className="leading-relaxed">{suggestion}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <Button onClick={onOptimize} className="w-full" disabled={isOptimizing}>
+            <Button 
+              onClick={onOptimize} 
+              className="w-full touch-target" 
+              disabled={isOptimizing}
+            >
               {isOptimizing ? "Gerando versões otimizadas..." : "Gerar Versões Otimizadas"}
             </Button>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-40 text-gray-500">
+          <div className="flex items-center justify-center h-full text-gray-500">
             Cole seu anúncio e clique em "Analisar" para ver o diagnóstico
           </div>
         )}

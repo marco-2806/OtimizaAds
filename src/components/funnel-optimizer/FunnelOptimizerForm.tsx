@@ -42,21 +42,26 @@ export const FunnelOptimizerForm = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {usageData && usageData.limit > 0 && (
-        <Alert variant={usageData.current >= usageData.limit * 0.8 ? "warning" : "default"}>
-          <AlertTitle className="flex items-center gap-2">
+        <Alert 
+          variant={usageData.current >= usageData.limit * 0.8 ? "warning" : "default"}
+          className="sm:flex sm:items-center sm:justify-between"
+        >
+          <div className="flex items-center gap-2 mb-2 sm:mb-0">
+            <AlertTitle className="flex items-center gap-2">
             {usageData.current >= usageData.limit * 0.8 && (
               <AlertTriangle className="h-4 w-4 text-yellow-600" />
             )}
             Uso do recurso
-          </AlertTitle>
-          <AlertDescription>
+            </AlertTitle>
+          </div>
+          <AlertDescription className="text-sm">
             Você utilizou {usageData.current} de {usageData.limit} análises disponíveis em seu plano atual.
           </AlertDescription>
         </Alert>
       )}
 
       {!canUseFeature && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="animate-pulse">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Limite atingido</AlertTitle>
           <AlertDescription>
@@ -71,8 +76,8 @@ export const FunnelOptimizerForm = ({
           <TabsTrigger value="landing">Texto da Página de Destino</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="ad" className="space-y-4 mt-4">
-          <Card>
+        <TabsContent value="ad" className="space-y-4 mt-4 min-h-[300px]">
+          <Card className="h-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 Texto do Anúncio
@@ -81,13 +86,13 @@ export const FunnelOptimizerForm = ({
                 Cole o texto completo do seu anúncio (título, descrição e chamada para ação)
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="h-full">
               <div className="space-y-2">
                 <Textarea
                   value={adText}
                   onChange={(e) => setAdText(e.target.value)}
                   placeholder="Ex: 🔥 Curso de Marketing Digital com 50% OFF! Aprenda a criar campanhas que convertem e aumente suas vendas. Últimas vagas disponíveis, inscreva-se agora!"
-                  className={`min-h-[200px] resize-none ${adTextExceedsLimit ? 'border-red-500' : ''}`}
+                  className={`min-h-[200px] h-full resize-none ${adTextExceedsLimit ? 'border-red-500' : ''}`}
                   disabled={!canUseFeature || isAnalyzing}
                 />
                 <div className="flex justify-between">
@@ -106,11 +111,11 @@ export const FunnelOptimizerForm = ({
           </Card>
           
           <div className="flex justify-end">
-            <Button 
+            <Button
               type="button" 
               variant="outline" 
               onClick={() => setActiveTab("landing")}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 touch-target"
               disabled={!canUseFeature || isAnalyzing}
             >
               Próximo
@@ -119,8 +124,8 @@ export const FunnelOptimizerForm = ({
           </div>
         </TabsContent>
         
-        <TabsContent value="landing" className="space-y-4 mt-4">
-          <Card>
+        <TabsContent value="landing" className="space-y-4 mt-4 min-h-[300px]">
+          <Card className="h-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 Texto da Página de Destino
@@ -129,13 +134,13 @@ export const FunnelOptimizerForm = ({
                 Cole o texto principal da sua página de destino (headline, benefícios, descrição)
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="h-full">
               <div className="space-y-2">
                 <Textarea
                   value={landingPageText}
                   onChange={(e) => setLandingPageText(e.target.value)}
                   placeholder="Ex: Curso Completo de Marketing Digital | Transforme seu negócio com estratégias comprovadas. Nosso curso abrange Facebook Ads, Google Ads, SEO e muito mais. Garanta 50% de desconto na inscrição até o final da semana."
-                  className={`min-h-[300px] resize-none ${landingPageTextExceedsLimit ? 'border-red-500' : ''}`}
+                  className={`min-h-[250px] h-full resize-none ${landingPageTextExceedsLimit ? 'border-red-500' : ''}`}
                   disabled={!canUseFeature || isAnalyzing}
                 />
                 <div className="flex justify-between">
@@ -154,17 +159,19 @@ export const FunnelOptimizerForm = ({
           </Card>
           
           <div className="flex justify-between">
-            <Button 
+            <Button
               type="button" 
               variant="outline" 
               onClick={() => setActiveTab("ad")}
+              className="touch-target"
               disabled={!canUseFeature || isAnalyzing}
             >
               Voltar ao Anúncio
             </Button>
             
-            <Button 
+            <Button
               type="submit" 
+              className="touch-target"
               disabled={
                 isAnalyzing || 
                 !adText.trim() || 
