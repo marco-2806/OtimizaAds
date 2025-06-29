@@ -318,7 +318,7 @@ export const ErrorLogsViewer = () => {
 
       {/* Error Detail Dialog */}
       <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Detalhes do Erro</DialogTitle>
             <DialogDescription>

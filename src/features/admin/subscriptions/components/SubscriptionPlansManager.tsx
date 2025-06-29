@@ -436,14 +436,14 @@ const SubscriptionPlansManager = ({ onPlanUpdated }: SubscriptionPlansManagerPro
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingPlan?.id ? 'Editar Plano' : 'Criar Novo Plano'}
+              {editingPlan?.id ? 'Editar Plano' : 'Novo Plano'}
             </DialogTitle>
             <DialogDescription>
               Configure as informações e recursos do plano de assinatura.
             </DialogDescription>
           </DialogHeader>
           
-          <PlanForm 
+          <PlanForm
             plan={editingPlan} 
             onSave={savePlan}
             onCancel={() => {
@@ -640,7 +640,7 @@ const PlanForm = ({
         </TabsContent>
         
         <TabsContent value="features" className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="generations">Gerações (-1 para ilimitado)</Label>
               <Input
