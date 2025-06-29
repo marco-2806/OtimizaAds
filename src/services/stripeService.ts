@@ -78,9 +78,13 @@ export const stripeService = {
    * Verifica se o usuário tem uma assinatura ativa
    * @returns true se o usuário tem uma assinatura ativa, false caso contrário
    */
-  async hasActiveSubscription(): Promise<boolean> {
+  async hasActiveSubscription(userId?: string): Promise<boolean> {
     try {
-      const { data, error } = await supabase.rpc('has_active_subscription');
+      // Se userId for fornecido, usa a versão com parâmetro
+      // Caso contrário, usa a versão sem parâmetro
+      const { data, error } = userId
+        ? await supabase.rpc('has_active_subscription', { user_uuid: userId })
+        : await supabase.rpc('has_active_subscription');
       
       if (error) throw error;
       return !!data;
