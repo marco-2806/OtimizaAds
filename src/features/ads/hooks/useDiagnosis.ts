@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/features/auth";
 import { supabase } from "@/integrations/supabase/client";
+import DOMPurify from "dompurify";
 
 interface DiagnosisReport {
   clarityScore: number;
@@ -26,27 +27,42 @@ export const useDiagnosis = () => {
       return { isValid: false, error: "O texto do anúncio não pode estar vazio." };
     }
     
-    if (text.length > 1000) {
+    // Extrair apenas o texto sem as tags HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = text;
+    const textOnly = tempDiv.textContent || tempDiv.innerText || '';
+    
+    if (textOnly.length < 50) {
+      return { isValid: false, error: "O texto do anúncio deve ter no mínimo 50 caracteres." };
+    }
+    
+    if (textOnly.length > 1000) {
       return { isValid: false, error: "O texto do anúncio deve ter no máximo 1000 caracteres." };
     }
     
-    // Remover espaços extras e formatar o texto
-    const formattedText = text
-      .trim()
-      .replace(/\s+/g, ' ')
-      .replace(/[^\w\s.,!?;:()"'-]/g, '');
+    // Sanitizar o HTML para remover scripts maliciosos
+    const sanitizedHtml = DOMPurify.sanitize(text);
+    
+    // Para o caso de precisarmos apenas do texto simples para a API
+    const plainText = textOnly.trim().replace(/\s+/g, ' ');
       
-    return { isValid: true, formattedText };
+    return { isValid: true, formattedText: plainText, originalHtml: sanitizedHtml };
   };
 
-  const saveToHistory = async (originalText: string, diagnosisReport: DiagnosisReport, optimizedAds: string[] = []) => {
+  const saveToHistory = async (originalHtml: string, diagnosisReport: DiagnosisReport, optimizedAds: string[] = []) => {
     if (!user) return;
 
     try {
-      const content = `TEXTO ORIGINAL:\n${originalText}\n\n---\n\nRELATÓRIO DE DIAGNÓSTICO:\n${JSON.stringify(diagnosisReport, null, 2)}\n\n---\n\nVERSÕES OTIMIZADAS:\n${optimizedAds.join('\n\n')}`;
+      // Extrair texto puro para o título
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = originalHtml;
+      const textOnly = tempDiv.textContent || tempDiv.innerText || '';
+      
+      // Criar conteúdo combinando HTML e relatório
+      const content = `TEXTO ORIGINAL:\n${originalHtml}\n\n---\n\nRELATÓRIO DE DIAGNÓSTICO:\n${JSON.stringify(diagnosisReport, null, 2)}\n\n---\n\nVERSÕES OTIMIZADAS:\n${optimizedAds.join('\n\n')}`;
       
       const inputData = JSON.parse(JSON.stringify({
-        originalText,
+        originalHtml,
         diagnosisReport,
         optimizedAds
       }));
@@ -56,7 +72,7 @@ export const useDiagnosis = () => {
         .insert({
           user_id: user.id,
           type: 'diagnosis',
-          title: `Diagnóstico: ${originalText.substring(0, 50)}...`,
+          title: `Diagnóstico: ${textOnly.substring(0, 50)}...`,
           content: content,
           input_data: inputData
         });
@@ -96,8 +112,9 @@ export const useDiagnosis = () => {
       return;
     }
 
-    // Usar o texto formatado
+    // Usar o texto formatado para a API e o HTML original para salvar
     const formattedAdText = validation.formattedText!;
+    const originalHtml = validation.originalHtml;
     
     setIsAnalyzing(true);
 
@@ -156,7 +173,7 @@ export const useDiagnosis = () => {
       setDiagnosisReport(mockReport);
       
       // Salvar diagnóstico no histórico
-      await saveToHistory(formattedAdText, mockReport);
+      await saveToHistory(originalHtml, mockReport);
       
       toast({
         title: "Análise concluída!",

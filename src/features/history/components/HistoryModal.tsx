@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Copy, Calendar } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
+import DOMPurify from "dompurify";
 
 type HistoryItem = Tables<'history_items'>;
 
@@ -76,9 +77,16 @@ const HistoryModal = ({ item, open, onOpenChange }: HistoryModalProps) => {
           </div>
         </DialogHeader>
         
-        <ScrollArea className="max-h-[60vh] w-full rounded-md border p-3 sm:p-4 mt-4">
-          <div className="whitespace-pre-wrap text-sm leading-relaxed">
-            {item.content}
+        <ScrollArea className="max-h-[50vh] w-full rounded-md border p-3 sm:p-4 mt-4">
+          <div 
+            className="text-sm leading-relaxed history-content" 
+            dangerouslySetInnerHTML={{ 
+              __html: DOMPurify.sanitize(item.content)
+                .replace(/TEXTO ORIGINAL:/g, '<h3 class="font-bold text-gray-800 mt-4 mb-2">TEXTO ORIGINAL:</h3>')
+                .replace(/RELATÓRIO DE DIAGNÓSTICO:/g, '<h3 class="font-bold text-gray-800 mt-4 mb-2">RELATÓRIO DE DIAGNÓSTICO:</h3>')
+                .replace(/VERSÕES OTIMIZADAS:/g, '<h3 class="font-bold text-gray-800 mt-4 mb-2">VERSÕES OTIMIZADAS:</h3>') 
+            }}
+          >
           </div>
         </ScrollArea>
       </DialogContent>
