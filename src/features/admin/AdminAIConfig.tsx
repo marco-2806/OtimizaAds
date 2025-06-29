@@ -7,7 +7,6 @@ import { PromptEditor } from "@/components/admin/ai-config/PromptEditor";
 import { ConfigAuditLog } from "@/components/admin/ai-config/ConfigAuditLog";
 import { ProviderManager } from "@/components/admin/ai-config/ProviderManager";
 import { AIMonitoring } from "@/components/admin/ai-config/AIMonitoring";
-import { FunnelOptimizerSettings } from "@/components/admin/ai-config/FunnelOptimizerSettings";
 import { RefreshCw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -61,13 +60,12 @@ const AdminAIConfig = () => {
         onValueChange={setActiveTab} 
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="hierarchy">Hierarquia</TabsTrigger>
           <TabsTrigger value="models">Modelos</TabsTrigger>
           <TabsTrigger value="prompts">Prompts</TabsTrigger>
           <TabsTrigger value="providers">Provedores</TabsTrigger>
           <TabsTrigger value="monitoring">Monitoramento</TabsTrigger>
-          <TabsTrigger value="funnel">Otimizador de Funil</TabsTrigger>
           <TabsTrigger value="audit">Auditoria</TabsTrigger>
         </TabsList>
 
@@ -89,10 +87,6 @@ const AdminAIConfig = () => {
 
         <TabsContent value="monitoring">
           <AIMonitoring />
-        </TabsContent>
-
-        <TabsContent value="funnel">
-          <FunnelOptimizerSettings />
         </TabsContent>
 
         <TabsContent value="audit">

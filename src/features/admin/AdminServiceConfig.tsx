@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ServiceManager from "@/components/admin/service-config/ServiceManager";
 import { AlertTriangle, RefreshCw, Save } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/hooks/use-toast";
+import { FunnelOptimizerSettings } from "@/components/admin/ai-config/FunnelOptimizerSettings";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminServiceConfig = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [activeTab, setActiveTab] = useState("services");
 
   // Função para publicar todas as alterações
   const publishChanges = async () => {
@@ -80,7 +83,20 @@ const AdminServiceConfig = () => {
         </Alert>
       )}
 
-      <ServiceManager />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="services">Serviços</TabsTrigger>
+          <TabsTrigger value="funnel">Laboratório de Otimização de Funil</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="services">
+          <ServiceManager />
+        </TabsContent>
+
+        <TabsContent value="funnel">
+          <FunnelOptimizerSettings />
+        </TabsContent>
+      </Tabs>
       
       <Card>
         <CardHeader>
@@ -99,11 +115,12 @@ const AdminServiceConfig = () => {
           </div>
           
           <div className="space-y-2">
-            <h3 className="font-semibold">Integrações com APIs</h3>
+            <h3 className="font-semibold">Integrações com Modelos de IA</h3>
             <p className="text-sm text-gray-600">
-              Para serviços que utilizam APIs externas (como OpenAI, Anthropic, etc.), 
-              certifique-se de que as chaves de API estão configuradas corretamente.
-              As chaves são armazenadas de forma segura e não são expostas aos usuários.
+              Para serviços que utilizam IA (como geração de anúncios e análise de funil), 
+              certifique-se de selecionar os modelos de IA adequados que foram configurados
+              na seção de Modelos de IA. As configurações dos modelos como temperatura e tokens
+              máximos serão utilizadas automaticamente.
             </p>
           </div>
           
