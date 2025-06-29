@@ -88,7 +88,7 @@ const StripeIntegration = () => {
         setSettings(data.value as StripeSettings);
         setIsConnected(!!data.value.publishable_key && !!data.value.secret_key);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao buscar configurações do Stripe:', error);
       toast({
         title: "Erro",
@@ -459,116 +459,130 @@ const StripeIntegration = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="webhook_url">URL do Webhook</Label>
+                <Label htmlFor="webhook_url">URL do Webhook</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="webhook_url"
+                    value={settings.webhook_url}
+                    onChange={(e) => setSettings({ ...settings, webhook_url: e.target.value })}
+                    placeholder="https://seu-projeto.supabase.co/functions/v1/stripe-webhook"
+                    className="flex-1"
+                    readOnly
+                  />
                   <Button 
-                    variant="ghost" 
+                    variant="outline" 
                     size="sm"
                     onClick={() => copyToClipboard(settings.webhook_url, 'URL do webhook')}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>
-                <Input
-                  id="webhook_url"
-                  value={settings.webhook_url}
-                  onChange={(e) => setSettings({ ...settings, webhook_url: e.target.value })}
-                  placeholder="https://seu-projeto.supabase.co/functions/v1/stripe-webhook"
-                />
-                <p className="text-xs text-gray-500">
-                  URL para configurar no painel do Stripe
-                </p>
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500">
+                    Esta é a URL que você deve configurar no <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">painel do Stripe</a> para receber eventos.
+                  </p>
+                </div>
+                
+                <div className="bg-blue-50 p-3 rounded-md border border-blue-200 mt-4">
+                  <p className="text-xs font-medium text-blue-700">
+                    Eventos recomendados para configurar no webhook:
+                  </p>
+                  <ul className="mt-1 space-y-1 text-xs text-blue-600 list-disc pl-4">
+                    <li>checkout.session.completed</li>
+                    <li>customer.subscription.created</li>
+                    <li>customer.subscription.updated</li>
+                    <li>customer.subscription.deleted</li>
+                    <li>invoice.paid</li>
+                    <li>invoice.payment_failed</li>
+                  </ul>
+                </div>
               </div>
               
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="webhook_secret">Chave Secreta do Webhook</Label>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => setShowWebhookSecret(!showWebhookSecret)}
-                    >
-                      {showWebhookSecret ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => copyToClipboard(settings.webhook_secret, 'Chave secreta do webhook')}
-                      disabled={!settings.webhook_secret}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
+              <div className="space-y-2 mt-6">
+                <Label htmlFor="webhook_secret">Chave Secreta do Webhook</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="webhook_secret"
+                    type={showWebhookSecret ? "text" : "password"}
+                    value={settings.webhook_secret}
+                    onChange={(e) => setSettings({ ...settings, webhook_secret: e.target.value })}
+                    placeholder="whsec_..."
+                    className="flex-1"
+                  />
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowWebhookSecret(!showWebhookSecret)}
+                  >
+                    {showWebhookSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
                 </div>
-                <Input
-                  id="webhook_secret"
-                  type={showWebhookSecret ? "text" : "password"}
-                  value={settings.webhook_secret}
-                  onChange={(e) => setSettings({ ...settings, webhook_secret: e.target.value })}
-                  placeholder="whsec_..."
-                />
                 <p className="text-xs text-gray-500">
-                  Fornecido pelo Stripe ao configurar o webhook
+                  Esta é a chave de assinatura fornecida pelo Stripe ao configurar o webhook.
                 </p>
               </div>
-              
-              <div className="bg-blue-50 p-4 rounded-md border border-blue-200 mt-4">
-                <div className="flex items-start gap-2">
-                  <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-blue-800 font-medium">Como configurar webhooks no Stripe</p>
-                    <ol className="text-sm text-blue-700 mt-1 space-y-1 list-decimal pl-4">
-                      <li>Acesse o <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener noreferrer" className="underline">painel do Stripe</a></li>
-                      <li>Clique em "Adicionar endpoint"</li>
-                      <li>Cole a URL do webhook acima</li>
-                      <li>Selecione os eventos: <code>checkout.session.completed</code>, <code>customer.subscription.created</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code>, <code>invoice.paid</code>, <code>invoice.payment_failed</code></li>
-                      <li>Copie a chave de assinatura do webhook e cole no campo acima</li>
-                    </ol>
-                  </div>
-                </div>
+
+              <div className="mt-4 flex justify-end">
+                <Button 
+                  onClick={saveSettings} 
+                  disabled={isSaving || !settings.webhook_secret}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {isSaving ? 'Salvando...' : 'Salvar Configurações de Webhook'}
+                </Button>
               </div>
             </CardContent>
           </Card>
-          
-          <Card>
+
+          <Card className="mt-6">
             <CardHeader>
-              <CardTitle>Eventos Recentes</CardTitle>
+              <CardTitle>Eventos Recebidos</CardTitle>
               <CardDescription>
-                Últimos eventos recebidos do Stripe
+                Últimos eventos de webhook processados
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID do Evento</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Data/Hora</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {webhookEvents.map((event) => (
-                    <TableRow key={event.id}>
-                      <TableCell className="font-mono text-xs">{event.id}</TableCell>
-                      <TableCell>{event.type}</TableCell>
-                      <TableCell>
-                        <Badge variant={event.status === 'success' ? 'default' : 'destructive'}>
-                          {event.status === 'success' ? 'Sucesso' : 'Erro'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{formatDate(event.created_at)}</TableCell>
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID do Evento</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Data</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              
-              {webhookEvents.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  Nenhum evento de webhook recebido ainda.
-                </div>
-              )}
+                  </TableHeader>
+                  <TableBody>
+                    {webhookEvents.length > 0 ? (
+                      webhookEvents.map((event) => (
+                        <TableRow key={event.id}>
+                          <TableCell className="font-mono text-xs">{event.id}</TableCell>
+                          <TableCell>{event.type}</TableCell>
+                          <TableCell>
+                            <Badge variant={event.status === 'success' ? 'default' : 'destructive'}>
+                              {event.status === 'success' ? 'Sucesso' : 'Erro'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{formatDate(event.created_at)}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-4 text-gray-500">
+                          Nenhum evento de webhook registrado ainda
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              <div className="mt-4 flex justify-end">
+                <Button variant="outline" onClick={fetchWebhookEvents}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Atualizar Eventos
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
