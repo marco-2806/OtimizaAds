@@ -177,33 +177,49 @@ ${results.optimizedAd}
     setIsAnalyzing(true);
 
     try {
-      // Chamar a Edge Function do Supabase
-      const { data, error } = await supabase.functions.invoke('funnel-optimizer', {
-        body: { 
-          adText: adText.trim(), 
-          landingPageText: landingPageText.trim()
+      // Chamar a Edge Function do Supabase com timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 segundos de timeout
+      
+      try {
+        const { data, error } = await supabase.functions.invoke('funnel-optimizer', {
+          body: { 
+            adText: adText.trim(), 
+            landingPageText: landingPageText.trim() 
+          },
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (error) {
+          console.error('Erro ao chamar Edge Function:', error);
+          throw error;
         }
-      });
-      
-      if (error) throw error;
-      
-      if (!data || !data.funnelCoherenceScore) {
-        throw new Error('Resposta inválida da API');
-      }
-      
-      // Atualizar dados de uso após análise bem-sucedida
-      await checkFeatureUsage();
-      
-      // Definir resultados
-      setAnalysisResults(data);
-      
-      // Salvar no histórico
-      await saveToHistory(adText, landingPageText, data);
+        
+        if (!data || typeof data !== 'object') {
+          throw new Error('Resposta inválida da API');
+        }
+        
+        // Atualizar dados de uso após análise bem-sucedida
+        await checkFeatureUsage();
+        
+        // Definir resultados
+        setAnalysisResults(data);
+        
+        // Salvar no histórico
+        await saveToHistory(adText, landingPageText, data);
 
-      toast({
-        title: "Análise concluída!",
-        description: `Pontuação de coerência: ${data.funnelCoherenceScore}/10`,
-      });
+        toast({
+          title: "Análise concluída!",
+          description: `Pontuação de coerência: ${data.funnelCoherenceScore}/10`,
+        });
+      } catch (fetchError) {
+        if (fetchError.name === 'AbortError') {
+          throw new Error('A análise demorou muito tempo. Por favor, tente novamente.');
+        }
+        throw fetchError;
+      }
     } catch (error: unknown) {
       console.error('Error analyzing funnel:', error);
 
@@ -219,7 +235,7 @@ ${results.optimizedAd}
       } else {
         toast({
           title: "Erro na análise",
-          description: errorMessage || "Não foi possível analisar os textos. Tente novamente mais tarde.",
+          description: "Não foi possível analisar os textos. O serviço pode estar temporariamente indisponível. Por favor, tente novamente mais tarde.",
           variant: "destructive",
         });
       }
