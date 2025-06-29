@@ -1,5 +1,6 @@
 
 import { DivideIcon as LucideIcon } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface MetricCardProps {
   title: string;
