@@ -46,7 +46,7 @@ export const FunnelOptimizerSettings = () => {
     cacheEnabled: true,
     cacheExpiryHours: 24,
     defaultModel: "",
-    promptTemplate: "Analise a coerência entre o seguinte anúncio e sua página de destino:\n\nANÚNCIO:\n\"{{adText}}\"\n\nPÁGINA DE DESTINO:\n\"{{landingPageText}}\"\n\nForneça a análise no seguinte formato JSON:\n{\n  \"funnelCoherenceScore\": número de 0 a 10 representando a pontuação de coerência,\n  \"adDiagnosis\": \"diagnóstico do anúncio\",\n  \"landingPageDiagnosis\": \"diagnóstico da página de destino\",\n  \"syncSuggestions\": [\"sugestão 1\", \"sugestão 2\", \"sugestão 3\", \"sugestão 4\"],\n  \"optimizedAd\": \"versão otimizada do anúncio para melhorar a coerência\"\n}"
+    promptTemplate: "Analise a coerência entre o seguinte anúncio e sua página de destino:\n\nANÚNCIO:\n" + "\"{{" + "adText" + "}}" + "\"\n\nPÁGINA DE DESTINO:\n" + "\"{{" + "landingPageText" + "}}" + "\"\n\nForneça a análise no seguinte formato JSON:\n{\n  \"funnelCoherenceScore\": número de 0 a 10 representando a pontuação de coerência,\n  \"adDiagnosis\": \"diagnóstico do anúncio\",\n  \"landingPageDiagnosis\": \"diagnóstico da página de destino\",\n  \"syncSuggestions\": [\"sugestão 1\", \"sugestão 2\", \"sugestão 3\", \"sugestão 4\"],\n  \"optimizedAd\": \"versão otimizada do anúncio para melhorar a coerência\"\n}"
   });
 
   useEffect(() => {
@@ -231,7 +231,7 @@ export const FunnelOptimizerSettings = () => {
               rows={5}
             />
             <p className="text-xs text-gray-500 mt-2">
-              Use {{adText}} e {{landingPageText}} como variáveis que serão substituídas
+              Use {"{{"  + "adText" + "}}"} e {"{{"  + "landingPageText" + "}}"} como variáveis que serão substituídas
             </p>
           </div>
           
