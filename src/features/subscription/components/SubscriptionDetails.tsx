@@ -197,11 +197,17 @@ const SubscriptionDetails = ({
                 </div>
                 <Progress 
                   value={getUsagePercentage(usageData.diagnostics.current, usageData.diagnostics.limit)}
-                  />
-                </div>
+                  className="h-2"
+                />
+                {usageData.diagnostics.limit !== -1 && usageData.diagnostics.current >= usageData.diagnostics.limit * 0.8 && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    Você está se aproximando do limite do seu plano
+                  </p>
+                )}
+              </div>
                 
                 {usageData.funnel_analysis && (
-                <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+              <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium">Análises de Funil</span>
                     <span className="text-sm text-gray-600">
@@ -212,8 +218,13 @@ const SubscriptionDetails = ({
                     value={getUsagePercentage(usageData.funnel_analysis.current, usageData.funnel_analysis.limit)}
                     className="h-2"
                   />
-                />
-                )}
+                  {usageData.funnel_analysis.limit !== -1 && usageData.funnel_analysis.current >= usageData.funnel_analysis.limit * 0.8 && (
+                    <p className="text-xs text-yellow-600 mt-1">
+                      Você está se aproximando do limite do seu plano
+                    </p>
+                  )}
+                </div>
+              )}
               </div>
             </div>
           </div>
