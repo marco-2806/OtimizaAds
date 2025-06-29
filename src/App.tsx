@@ -4,8 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, ProtectedRoute, AdminProtectedRoute, Login, Register } from "@/features/auth";
-import { AdGenerator, AdDiagnosis } from "@/features/ads";
-import { AdminDashboard, AdminUsers, AdminSettings, AdminAIConfig, AdminMonitoring, AdminSubscriptions } from "@/features/admin";
+import { AdGenerator, AdDiagnosis } from "@/features/ads"; 
+import { AdminDashboard, AdminUsers, AdminSettings, AdminAIConfig, AdminMonitoring, AdminSubscriptions, AdminServiceConfig } from "@/features/admin";
 import FunnelOptimizer from "./pages/app/funnel-optimizer";
 import { LandingPage } from "@/features/landing";
 import { Dashboard } from "@/features/dashboard";
@@ -59,6 +59,7 @@ const App = () => (
                 <Route path="ai-config" element={<AdminAIConfig />} />
                 <Route path="monitoring" element={<AdminMonitoring />} />
                 <Route path="subscriptions" element={<AdminSubscriptions />} />
+                <Route path="services" element={<AdminServiceConfig />} />
               </Route>
 
               {/* Legacy routes for backward compatibility */}

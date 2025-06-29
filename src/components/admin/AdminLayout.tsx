@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Users, BarChart3, Settings, Menu, LogOut, ShieldCheck, Activity, Brain, CreditCard, X } from "lucide-react";
+import { Users, BarChart3, Settings, Menu, LogOut, ShieldCheck, Activity, Brain, CreditCard, X, Server } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"; 
 import { useAuth } from "@/features/auth";
 
@@ -14,6 +14,7 @@ const AdminLayout = () => {
     { name: "Dashboard", href: "/admin/dashboard", icon: BarChart3 },
     { name: "Monitoramento", href: "/admin/monitoring", icon: Activity },
     { name: "Config. IA", href: "/admin/ai-config", icon: Brain, mobileName: "IA" },
+    { name: "Serviços", href: "/admin/services", icon: Server, mobileName: "Serviços" },
     { name: "Assinaturas", href: "/admin/subscriptions", icon: CreditCard },
     { name: "Usuários", href: "/admin/usuarios", icon: Users },
     { name: "Configurações", href: "/admin/configuracoes", icon: Settings },
