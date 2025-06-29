@@ -1,68 +1,44 @@
 // Tipos para configuração de provedores de IA
 
-/**
- * Interface para configuração de provedores de IA
- * Contém apenas dados de autenticação e conexão, sem parâmetros de modelo
- */
 export interface ProviderConfiguration {
-  api_key?: string;
+  api_key: string;
   api_endpoint?: string;
-  organization_id?: string;
-  auth_type?: string;
   timeout?: number;
-}
-
-/**
- * Interface para configuração de provedor OpenAI
- */
-interface OpenAIConfig extends ProviderConfiguration {
   organization_id?: string;
+  [key: string]: any; // Permite propriedades adicionais específicas de cada provedor
 }
 
 /**
- * Interface para configuração de provedor Anthropic
+ * Função para extrair a configuração do provedor da estrutura JSON do banco de dados
+ * @param configuration Objeto JSON com a configuração do provedor
+ * @returns Configuração tipada do provedor
  */
-interface AnthropicConfig extends ProviderConfiguration {
-  api_version?: string;
-}
+export function getProviderConfig(configuration: any): ProviderConfiguration {
+  if (!configuration) return { api_key: '', timeout: 30 };
 
-/**
- * Interface para configuração de provedor Novita
- */
-interface NovitaConfig extends ProviderConfiguration {
-  project_id?: string;
-}
-
-/**
- * Interface para configuração de provedor Google
- */
-interface GeminiConfig extends ProviderConfiguration {
-  project_id?: string;
-}
-
-/**
- * Interface para configuração de provedor DeepSeek
- */
-type DeepSeekConfig = ProviderConfiguration;
-
-/**
- * Interface para configuração de provedor compatível com OpenAI
- */
-interface OpenAICompatibleConfig extends ProviderConfiguration {
-  custom_endpoint: true;
-}
-
-// Type guard para verificar se a configuração é válida
-const isProviderConfiguration = (config: unknown): config is ProviderConfiguration => {
-  return typeof config === 'object' && config !== null;
-};
-
-/**
- * Extrai a configuração de provedor de um objeto genérico
- */
-export const getProviderConfig = (config: unknown): ProviderConfiguration => {
-  if (isProviderConfiguration(config)) {
-    return config;
+  // Se já for um objeto JSON, converter para objeto tipado
+  if (typeof configuration === 'object') {
+    return {
+      api_key: configuration.api_key || '',
+      api_endpoint: configuration.api_endpoint || '',
+      timeout: configuration.timeout || 30,
+      organization_id: configuration.organization_id || '',
+      ...configuration  // Preservar outras propriedades específicas do provedor
+    };
   }
-  return {};
-};
+  
+  // Tentar converter de string para objeto
+  try {
+    const parsed = JSON.parse(configuration);
+    return {
+      api_key: parsed.api_key || '',
+      api_endpoint: parsed.api_endpoint || '',
+      timeout: parsed.timeout || 30,
+      organization_id: parsed.organization_id || '',
+      ...parsed
+    };
+  } catch (e) {
+    // Retornar configuração padrão em caso de erro
+    return { api_key: '', timeout: 30 };
+  }
+}
