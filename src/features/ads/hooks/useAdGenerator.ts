@@ -2,7 +2,6 @@ import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/features/auth";
-import { useAuth } from "@/features/auth";
 
 export const useAdGenerator = () => {
   const [productName, setProductName] = useState("");
@@ -11,7 +10,6 @@ export const useAdGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAds, setGeneratedAds] = useState<string[]>([]);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const { user } = useAuth();
   const { user } = useAuth();
 
   const saveToHistory = async (inputData: Record<string, unknown>, generatedAds: string[]) => {

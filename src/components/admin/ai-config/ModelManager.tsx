@@ -21,7 +21,7 @@ import { toast } from "@/hooks/use-toast";
 // Schema for model validation
 const modelSchema = z.object({
   model_name: z.string().min(1, "Nome do modelo é obrigatório"),
-  provider: z.string().min(1, "Provedor é obrigatório"),
+  provider_id: z.string().min(1, "Provedor é obrigatório"),
   provider_model_id: z.string().min(1, "ID do modelo no provedor é obrigatório"),
   model_type: z.enum(["chat", "completion"], {
     required_error: "Tipo do modelo é obrigatório",
@@ -51,7 +51,7 @@ type Provider = {
 type Model = {
   id: string;
   model_name: string;
-  provider: string;
+  provider_id: string | null;
   provider_model_id: string;
   model_type: 'chat' | 'completion';
   cost_per_token_input?: number;
@@ -69,7 +69,22 @@ type Model = {
 };
 
 // Type definition for DB insertion (without relational provider data)
-type ModelInsertData = Omit<Model, 'id' | 'created_at' | 'provider_data'>;
+type ModelInsertData = {
+  model_name: string;
+  provider_id: string | null;
+  provider_model_id: string;
+  model_type: "chat" | "completion";
+  cost_per_token_input?: number;
+  cost_per_token_output?: number;
+  max_tokens?: number;
+  temperature?: number;
+  top_p?: number;
+  frequency_penalty?: number;
+  presence_penalty?: number;
+  supports_streaming: boolean;
+  supports_vision: boolean;
+  is_active: boolean;
+};
 
 
 export const ModelManager = () => {
@@ -83,7 +98,7 @@ export const ModelManager = () => {
     resolver: zodResolver(modelSchema),
     defaultValues: {
       model_name: "",
-      provider: "",
+      provider_id: "",
       provider_model_id: "",
       model_type: "chat",
       cost_per_token_input: 0,
@@ -259,7 +274,7 @@ export const ModelManager = () => {
         action: 'model_deactivated',
         details: {
           model_name: model.model_name,
-          provider: model.provider
+          provider: model.provider_id
         }
       });
     },
@@ -286,7 +301,7 @@ export const ModelManager = () => {
     setEditingModel(model);
     form.reset({
       model_name: model.model_name,
-      provider: model.provider,
+      provider_id: model.provider_id || '',
       provider_model_id: model.provider_model_id,
       model_type: model.model_type,
       cost_per_token_input: convertToPerMillion(model.cost_per_token_input || 0),
@@ -309,7 +324,7 @@ export const ModelManager = () => {
     form.reset({
       // Reset with default values
       model_name: "",
-      provider: "",
+      provider_id: "",
       provider_model_id: "",
       model_type: "chat",
       cost_per_token_input: 0,
@@ -473,13 +488,13 @@ export const ModelManager = () => {
 
                     <FormField
                       control={form.control}
-                      name="provider"
+                      name="provider_id"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Provedor</FormLabel>
                           <Select
                             onValueChange={field.onChange}
-                            value={field.value}
+                            value={field.value || ''}
                           >
                             <FormControl>
                               <SelectTrigger>

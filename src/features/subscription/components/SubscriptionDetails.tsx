@@ -67,7 +67,7 @@ const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
 
   const getUsagePercentage = (current: number, limit: number) => {
     if (limit === -1) return 0; // Ilimitado
-    return Math.min((current / limit) * 100, 100);
+    return current && limit ? Math.min((current / limit) * 100, 100) : 0;
   };
 
   return (
