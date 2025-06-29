@@ -21,7 +21,7 @@ import { toast } from "@/hooks/use-toast";
 // Schema for model validation
 const modelSchema = z.object({
   model_name: z.string().min(1, "Nome do modelo é obrigatório"),
-  provider_id: z.string().min(1, "Provedor é obrigatório"),
+  provider: z.string().min(1, "Provedor é obrigatório"),
   provider_model_id: z.string().min(1, "ID do modelo no provedor é obrigatório"),
   model_type: z.enum(["chat", "completion"], {
     required_error: "Tipo do modelo é obrigatório",
@@ -51,7 +51,7 @@ type Provider = {
 type Model = {
   id: string;
   model_name: string;
-  provider_id: string;
+  provider: string;
   provider_model_id: string;
   model_type: 'chat' | 'completion';
   cost_per_token_input?: number;
@@ -65,11 +65,11 @@ type Model = {
   supports_vision: boolean;
   is_active: boolean;
   created_at: string;
-  provider?: Provider;
+  provider_data?: Provider;
 };
 
 // Type definition for DB insertion (without relational provider data)
-type ModelInsertData = Omit<Model, 'id' | 'created_at' | 'provider'>;
+type ModelInsertData = Omit<Model, 'id' | 'created_at' | 'provider_data'>;
 
 
 export const ModelManager = () => {
@@ -83,7 +83,7 @@ export const ModelManager = () => {
     resolver: zodResolver(modelSchema),
     defaultValues: {
       model_name: "",
-      provider_id: "",
+      provider: "",
       provider_model_id: "",
       model_type: "chat",
       cost_per_token_input: 0,
@@ -107,7 +107,7 @@ export const ModelManager = () => {
         .from("ai_models")
         .select(`
           *,
-          provider:provider_id (
+          provider_data:provider_id (
             id,
             display_name,
             provider_name
@@ -160,7 +160,7 @@ export const ModelManager = () => {
         throw new Error(`Já existe um modelo com o nome "${data.model_name}". Por favor, escolha um nome diferente.`);
       }
 
-      const insertData: Omit<ModelInsertData, 'provider_id'> & { provider_id: string } = {
+      const insertData: ModelInsertData = {
         ...data,
         cost_per_token_input: convertToPerToken(data.cost_per_token_input || 0),
         cost_per_token_output: convertToPerToken(data.cost_per_token_output || 0),
@@ -199,7 +199,7 @@ export const ModelManager = () => {
         throw new Error(`Já existe um modelo com o nome "${data.model_name}". Por favor, escolha um nome diferente.`);
       }
 
-      const updateData: Omit<ModelInsertData, 'provider_id'> & { provider_id: string } = {
+      const updateData: ModelInsertData = {
         ...data,
         cost_per_token_input: convertToPerToken(data.cost_per_token_input || 0),
         cost_per_token_output: convertToPerToken(data.cost_per_token_output || 0),
@@ -259,7 +259,7 @@ export const ModelManager = () => {
         action: 'model_deactivated',
         details: {
           model_name: model.model_name,
-          provider_id: model.provider_id
+          provider: model.provider
         }
       });
     },
@@ -286,7 +286,7 @@ export const ModelManager = () => {
     setEditingModel(model);
     form.reset({
       model_name: model.model_name,
-      provider_id: model.provider_id,
+      provider: model.provider,
       provider_model_id: model.provider_model_id,
       model_type: model.model_type,
       cost_per_token_input: convertToPerMillion(model.cost_per_token_input || 0),
@@ -309,7 +309,7 @@ export const ModelManager = () => {
     form.reset({
       // Reset with default values
       model_name: "",
-      provider_id: "",
+      provider: "",
       provider_model_id: "",
       model_type: "chat",
       cost_per_token_input: 0,
@@ -385,7 +385,7 @@ export const ModelManager = () => {
             {models?.map((model) => (
               <TableRow key={model.id}>
                 <TableCell className="font-medium">{model.model_name}</TableCell>
-                <TableCell>{model.provider?.display_name || "Desconhecido"}</TableCell>
+                <TableCell>{model.provider_data?.display_name || "Desconhecido"}</TableCell>
                 <TableCell>
                   <Badge variant="outline">{model.model_type}</Badge>
                 </TableCell>
@@ -473,7 +473,7 @@ export const ModelManager = () => {
 
                     <FormField
                       control={form.control}
-                      name="provider_id"
+                      name="provider"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Provedor</FormLabel>
