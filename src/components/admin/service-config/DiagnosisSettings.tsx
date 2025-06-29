@@ -45,7 +45,7 @@ export const DiagnosisSettings = () => {
     cacheEnabled: true,
     cacheExpiryHours: 24,
     defaultModel: "",
-    promptTemplate: "Analise o seguinte anúncio e forneça um diagnóstico detalhado:\n\n\"{{adText}}\"\n\nForneça:\n1. Uma pontuação de clareza de 0-10\n2. Análise do gancho inicial\n3. Análise da chamada para ação\n4. Gatilhos mentais presentes ou que deveriam ser usados\n5. Sugestões específicas de melhoria"
+    promptTemplate: "Analise o seguinte anúncio e forneça um diagnóstico detalhado:\n\n\"" + "{{" + "adText" + "}}" + "\"\n\nForneça:\n1. Uma pontuação de clareza de 0-10\n2. Análise do gancho inicial\n3. Análise da chamada para ação\n4. Gatilhos mentais presentes ou que deveriam ser usados\n5. Sugestões específicas de melhoria"
   });
 
   useEffect(() => {
@@ -230,7 +230,7 @@ export const DiagnosisSettings = () => {
               rows={5}
             />
             <p className="text-xs text-gray-500 mt-2">
-              Use {{adText}} como variável que será substituída pelo texto do anúncio
+              Use {"{" + "{" + "adText" + "}" + "}"} como variável que será substituída pelo texto do anúncio
             </p>
           </div>
           
