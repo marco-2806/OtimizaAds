@@ -141,10 +141,14 @@ export const ProviderManager = () => {
   const handleSaveConfig = () => {
     if (!selectedProvider) return;
 
+    // Obter configuração existente do provedor
+    const existingConfig = getProviderConfig(selectedProvider.configuration);
+    
     // Preparar configuração para salvar
     const configuration: ProviderConfiguration = {
       ...providerConfig,
-      api_key: providerConfig.api_key ? "***CONFIGURED***" : undefined,
+      // Preservar API key existente se o campo estiver vazio
+      api_key: providerConfig.api_key ? providerConfig.api_key : existingConfig.api_key,
     };
 
     updateProviderMutation.mutate({
