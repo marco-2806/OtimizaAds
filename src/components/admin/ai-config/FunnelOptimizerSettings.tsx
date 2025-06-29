@@ -8,11 +8,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FunnelOptimizerConfig } from "@/types/funnel-optimizer";
+import { useQuery } from "@tanstack/react-query";
 
 export const FunnelOptimizerSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  
+  // Buscar modelos de IA disponíveis
+  const { data: aiModels } = useQuery({
+    queryKey: ["ai-models-active"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ai_models")
+        .select(`
+          id, 
+          model_name,
+          provider_data:provider_id (
+            display_name
+          )
+        `)
+        .eq("is_active", true)
+        .order("model_name");
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
   
   // Configurações do Laboratório de Otimização de Funil
   const [funnelConfig, setFunnelConfig] = useState<FunnelOptimizerConfig>({
@@ -173,21 +195,27 @@ export const FunnelOptimizerSettings = () => {
           <div>
             <Label htmlFor="funnel_default_model">Modelo Padrão</Label>
             <Select 
-              value={funnelConfig.defaultModel} 
+              value={funnelConfig.defaultModel || ""} 
               onValueChange={(value) => setFunnelConfig({...funnelConfig, defaultModel: value})}
             >
               <SelectTrigger id="funnel_default_model">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="gpt-4o">GPT-4o</SelectItem>
-                <SelectItem value="gpt-4">GPT-4</SelectItem>
-                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-                <SelectItem value="claude-3-5-sonnet">Claude 3.5 Sonnet</SelectItem>
-                <SelectItem value="claude-3-opus">Claude 3 Opus</SelectItem>
-                <SelectItem value="claude-3-haiku">Claude 3 Haiku</SelectItem>
+                {aiModels?.length ? (
+                  aiModels.map(model => (
+                    <SelectItem key={model.id} value={model.id}>
+                      {model.model_name} {model.provider_data?.display_name ? `(${model.provider_data.display_name})` : ''}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no-models" disabled>Nenhum modelo disponível</SelectItem>
+                )}
               </SelectContent>
             </Select>
+            <p className="text-xs text-gray-500 mt-2">
+              Modelo de IA que será utilizado para analisar a coerência entre anúncios e páginas de destino
+            </p>
           </div>
           
           <div className="flex items-center justify-between">

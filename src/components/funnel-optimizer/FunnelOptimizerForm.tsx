@@ -2,8 +2,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, Lightbulb, AlertTriangle } from "lucide-react";
+import { ArrowRight, Lightbulb, AlertTriangle, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useState } from "react";
 
@@ -30,33 +31,32 @@ export const FunnelOptimizerForm = ({
 }: FunnelOptimizerFormProps) => {
   const [activeTab, setActiveTab] = useState<string>("ad");
 
+  // Validar limites de caracteres
+  const adTextExceedsLimit = adText.length > 2000;
+  const landingPageTextExceedsLimit = landingPageText.length > 5000;
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onAnalyze();
   };
 
-  // Validar limites de caracteres
-  const adTextExceedsLimit = adText.length > 2000;
-  const landingPageTextExceedsLimit = landingPageText.length > 5000;
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {usageData && usageData.limit > 0 && (
-        <Alert 
-          variant={usageData.current >= usageData.limit * 0.8 ? "warning" : "default"}
-          className="sm:flex sm:items-center sm:justify-between"
-        >
-          <div className="flex items-center gap-2 mb-2 sm:mb-0">
-            <AlertTitle className="flex items-center gap-2">
-            {usageData.current >= usageData.limit * 0.8 && (
-              <AlertTriangle className="h-4 w-4 text-yellow-600" />
-            )}
-            Uso do recurso
-            </AlertTitle>
+        <Alert variant={usageData.current >= usageData.limit * 0.8 ? "warning" : "default"}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 mb-2 sm:mb-0">
+              <AlertTitle className="flex items-center gap-2">
+              {usageData.current >= usageData.limit * 0.8 && (
+                <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              )}
+              Uso do recurso
+              </AlertTitle>
+            </div>
+            <AlertDescription className="text-sm">
+              Você utilizou {usageData.current} de {usageData.limit} análises disponíveis em seu plano atual.
+            </AlertDescription>
           </div>
-          <AlertDescription className="text-sm">
-            Você utilizou {usageData.current} de {usageData.limit} análises disponíveis em seu plano atual.
-          </AlertDescription>
         </Alert>
       )}
 
@@ -126,13 +126,11 @@ export const FunnelOptimizerForm = ({
         
         <TabsContent value="landing" className="space-y-4 mt-4 min-h-[300px]">
           <Card className="h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+            <CardHeader className="flex flex-col">
+              <div className="text-xl font-medium mb-1">
                 Texto da Página de Destino
-              </CardTitle>
-              <CardDescription>
-                Cole o texto principal da sua página de destino (headline, benefícios, descrição)
-              </CardDescription>
+              </div>
+              <CardDescription>Cole o texto principal da sua página de destino (headline, benefícios, descrição)</CardDescription>
             </CardHeader>
             <CardContent className="h-full">
               <div className="space-y-2">
@@ -163,10 +161,12 @@ export const FunnelOptimizerForm = ({
               type="button" 
               variant="outline" 
               onClick={() => setActiveTab("ad")}
+              className="gap-2 touch-target"
               className="touch-target"
               disabled={!canUseFeature || isAnalyzing}
             >
-              Voltar ao Anúncio
+              <ArrowLeft className="h-4 w-4" />
+              <span>Voltar ao Anúncio</span>
             </Button>
             
             <Button
@@ -189,7 +189,11 @@ export const FunnelOptimizerForm = ({
                   </svg>
                   Analisando...
                 </>
-              ) : "Analisar Coerência"}
+              ) : (
+                <>
+                  Analisar Coerência
+                </>
+              )}
             </Button>
           </div>
         </TabsContent>

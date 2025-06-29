@@ -181,7 +181,7 @@ ${results.optimizedAd}
       const { data, error } = await supabase.functions.invoke('funnel-optimizer', {
         body: { 
           adText: adText.trim(), 
-          landingPageText: landingPageText.trim() 
+          landingPageText: landingPageText.trim()
         }
       });
       
@@ -209,11 +209,11 @@ ${results.optimizedAd}
 
       // Verificar se é um erro de limite de plano
       const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('não inclui acesso')) {
+      if (errorMessage.includes('não inclui') || errorMessage.includes('limite') || errorMessage.includes('atingiu')) {
         setCanUseFeature(false);
         toast({
-          title: "Recurso não disponível",
-          description: "Seu plano atual não inclui acesso ao Laboratório de Otimização de Funil. Faça upgrade para continuar.",
+          title: "Limite atingido",
+          description: "Você atingiu o limite de análises do seu plano ou seu plano não inclui este recurso. Faça upgrade para continuar.",
           variant: "destructive",
         });
       } else {

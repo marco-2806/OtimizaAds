@@ -4,7 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FunnelAnalysisResult } from "@/types/funnel-optimizer";
-import { ArrowLeft, Copy, CheckCircle, ArrowUpDown, Lightbulb, BarChart, ArrowRight } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Copy, 
+  CheckCircle, 
+  ArrowUpDown, 
+  Lightbulb, 
+  BarChart, 
+  ArrowRight,
+  ClipboardCheck 
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 
@@ -54,7 +63,7 @@ export const FunnelAnalysisResults = ({
     } catch (error) {
       toast({
         title: "Erro ao copiar",
-        description: "Não foi possível copiar o texto.",
+        description: "Não foi possível copiar o texto para a área de transferência.",
         variant: "destructive",
       });
     }
@@ -75,7 +84,7 @@ export const FunnelAnalysisResults = ({
           </Badge>
         </div>
         
-        <Button variant="outline" onClick={onReset} className="flex items-center gap-2 touch-target">
+        <Button variant="outline" onClick={onReset} className="flex items-center gap-2 touch-target h-10">
           <ArrowLeft className="h-4 w-4" />
           Nova Análise
         </Button>
@@ -91,9 +100,9 @@ export const FunnelAnalysisResults = ({
         <CardContent>
           <div className="space-y-4">
             <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Coerência de Mensagem</span>
-                <span className="text-sm font-medium">{Math.round(results.funnelCoherenceScore * 10)}%</span>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-medium text-gray-700">Coerência de Mensagem</span>
+                <span className="text-sm font-medium text-gray-700">{Math.round(results.funnelCoherenceScore * 10)}%</span>
               </div>
               <Progress value={results.funnelCoherenceScore * 10} className="h-2" />
             </div>
@@ -241,8 +250,8 @@ export const FunnelAnalysisResults = ({
               <CardTitle>Próximos Passos</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <p className="text-sm text-gray-700 leading-relaxed">
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600 leading-relaxed">
                   Para maximizar suas conversões, recomendamos:
                 </p>
                 <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700 pl-2">
@@ -265,11 +274,11 @@ export const FunnelAnalysisResults = ({
                   variant="outline" 
                   size="sm" 
                   onClick={() => copyToClipboard(results.optimizedAd)}
-                  className="flex items-center gap-2 touch-target"
+                  className="flex items-center gap-2 touch-target h-9"
                 >
                   {copiedAd ? (
                     <>
-                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <ClipboardCheck className="h-4 w-4 text-green-600" />
                       Copiado!
                     </>
                   ) : (
@@ -305,8 +314,8 @@ export const FunnelAnalysisResults = ({
             </CardContent>
           </Card>
           
-          <div className="flex justify-center sm:justify-between">
-            <Button variant="outline" onClick={onReset} className="touch-target">
+          <div className="flex justify-center sm:justify-between mt-6">
+            <Button variant="outline" onClick={onReset} className="touch-target h-10">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Nova Análise
             </Button>
