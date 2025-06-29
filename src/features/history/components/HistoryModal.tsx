@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area"; 
 import { Copy, Calendar } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
@@ -42,12 +42,12 @@ const HistoryModal = ({ item, open, onOpenChange }: HistoryModalProps) => {
   if (!item) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
+    <Dialog open={open} onOpenChange={onOpenChange} aria-label="Detalhes do histórico">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden w-[95vw] sm:w-auto p-4 sm:p-6">
         <DialogHeader>
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <DialogTitle className="text-xl">{item.title}</DialogTitle>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div className="space-y-1 sm:space-y-2">
+              <DialogTitle className="text-lg sm:text-xl break-words pr-8">{item.title}</DialogTitle>
               <DialogDescription className="flex items-center gap-4">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
@@ -64,10 +64,11 @@ const HistoryModal = ({ item, open, onOpenChange }: HistoryModalProps) => {
                 </Badge>
               </DialogDescription>
             </div>
-            <Button
+            <Button 
               variant="outline"
               size="sm"
               onClick={() => copyToClipboard(item.content)}
+              className="self-end"
             >
               <Copy className="h-4 w-4 mr-2" />
               Copiar
@@ -75,8 +76,8 @@ const HistoryModal = ({ item, open, onOpenChange }: HistoryModalProps) => {
           </div>
         </DialogHeader>
         
-        <ScrollArea className="max-h-[60vh] w-full rounded-md border p-4">
-          <div className="whitespace-pre-wrap text-sm">
+        <ScrollArea className="max-h-[60vh] w-full rounded-md border p-3 sm:p-4 mt-4">
+          <div className="whitespace-pre-wrap text-sm leading-relaxed">
             {item.content}
           </div>
         </ScrollArea>
