@@ -83,50 +83,6 @@ export const subscriptionService = {
     }
   },
 
-  /**
-   * Cria uma sessão de checkout do Stripe para um plano
-   * @param planId ID do plano
-   * @returns URL da sessão de checkout
-   */
-  async createCheckoutSession(planId: string): Promise<string | null> {
-    try {
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { plan_id: planId }
-      });
-
-      if (error) throw error;
-      return data?.url || null;
-    } catch (error) {
-      console.error('Erro ao criar sessão de checkout:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível iniciar o checkout.",
-        variant: "destructive",
-      });
-      return null;
-    }
-  },
-
-  /**
-   * Abre o portal do cliente para gerenciar a assinatura
-   * @returns URL do portal do cliente
-   */
-  async openCustomerPortal(): Promise<string | null> {
-    try {
-      const { data, error } = await supabase.functions.invoke('customer-portal');
-
-      if (error) throw error;
-      return data?.url || null;
-    } catch (error) {
-      console.error('Erro ao abrir portal do cliente:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível abrir o portal de gerenciamento.",
-        variant: "destructive",
-      });
-      return null;
-    }
-  },
   
   /**
    * Incrementa o contador de uso de uma funcionalidade

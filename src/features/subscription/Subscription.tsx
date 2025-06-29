@@ -11,6 +11,7 @@ import SubscriptionDetails from "./components/SubscriptionDetails";
 import SubscriptionPricing from "./components/SubscriptionPricing";
 import PaymentSection from "./components/PaymentSection";
 import SubscriptionPlans from "@/components/subscription/SubscriptionPlans";
+import { stripeService } from '@/services/stripeService';
 
 const Subscription = () => {
   const { 
@@ -70,12 +71,20 @@ const Subscription = () => {
 
   const fetchUsageData = async () => {
     try {
-      const [generationsUsage, diagnosticsUsage] = await Promise.all([
+      if (!user) return;
+      
+      // Verificar primeiro se tem assinatura ativa
+      const hasActiveSubscription = await stripeService.hasActiveSubscription();
+      if (!hasActiveSubscription) return;
+      
+      // Buscar dados de uso apenas se tiver assinatura ativa
+      const [generationsUsage, diagnosticsUsage, funnelAnalysisUsage] = await Promise.all([
         checkFeatureUsage('generations'),
-        checkFeatureUsage('diagnostics')
+        checkFeatureUsage('diagnostics'),
+        checkFeatureUsage('funnel_analysis')
       ]);
       
-      if (generationsUsage && diagnosticsUsage) {
+      if (generationsUsage && diagnosticsUsage && funnelAnalysisUsage) {
         setUsageData({
           generations: {
             current: generationsUsage.current_usage,
@@ -84,6 +93,10 @@ const Subscription = () => {
           diagnostics: {
             current: diagnosticsUsage.current_usage,
             limit: diagnosticsUsage.limit_value
+          },
+          funnel_analysis: {
+            current: funnelAnalysisUsage.current_usage,
+            limit: funnelAnalysisUsage.limit_value
           }
         });
       }

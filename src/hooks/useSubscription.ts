@@ -3,6 +3,7 @@ import { useAuth } from '@/features/auth';
 import { useToast } from '@/hooks/use-toast';
 import { SubscriptionPlan, UserSubscription, FeatureUsage } from '@/types/subscription';
 import { subscriptionService } from '@/services/subscriptionService';
+import { stripeService } from '@/services/stripeService';
 
 export const useSubscription = () => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -61,7 +62,7 @@ export const useSubscription = () => {
     setLoading(true);
     
     try {
-      const checkoutUrl = await subscriptionService.createCheckoutSession(planId);
+      const checkoutUrl = await stripeService.createCheckoutSession(planId);
       
       if (checkoutUrl) {
         // Redirecionar para a URL de checkout do Stripe
@@ -85,7 +86,7 @@ export const useSubscription = () => {
     setLoading(true);
     
     try {
-      const portalUrl = await subscriptionService.openCustomerPortal();
+      const portalUrl = await stripeService.openCustomerPortal();
       
       if (portalUrl) {
         // Redirecionar para o portal do cliente

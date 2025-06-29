@@ -16,6 +16,7 @@ interface SubscriptionDetailsProps {
   usageData?: {
     generations: { current: number; limit: number };
     diagnostics: { current: number; limit: number };
+    funnel_analysis?: { current: number; limit: number };
   };
 }
 
@@ -196,8 +197,23 @@ const SubscriptionDetails = ({
                 </div>
                 <Progress 
                   value={getUsagePercentage(usageData.diagnostics.current, usageData.diagnostics.limit)}
-                  className="h-2"
+                  />
+                </div>
+                
+                {usageData.funnel_analysis && (
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-medium">Análises de Funil</span>
+                    <span className="text-sm text-gray-600">
+                      {usageData.funnel_analysis.current} / {usageData.funnel_analysis.limit === -1 ? '∞' : usageData.funnel_analysis.limit}
+                    </span>
+                  </div>
+                  <Progress 
+                    value={getUsagePercentage(usageData.funnel_analysis.current, usageData.funnel_analysis.limit)}
+                    className="h-2"
+                  />
                 />
+                )}
               </div>
             </div>
           </div>
