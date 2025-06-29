@@ -177,8 +177,6 @@ const AdTextForm = ({ adText, setAdText, isAnalyzing, onAnalyze }: AdTextFormPro
               onClick={handleFocus}
               modules={quillModules}
               placeholder="Cole aqui o texto completo do seu anúncio..."
-              onFocus={handleFocus}
-              onClick={handleFocus}
               className={`min-h-[200px] h-full bg-white border-gray-300 text-gray-900 resize-none ${errorMessage ? 'border-red-500 focus:border-red-500' : ''}`}
               preserveWhitespace={true}
             />
