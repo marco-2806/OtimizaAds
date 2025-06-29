@@ -285,4 +285,3 @@ export const FunnelOptimizerSettings = () => {
   );
 };
 
-export default FunnelOptimizerSettings;

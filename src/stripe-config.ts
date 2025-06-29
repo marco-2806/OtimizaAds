@@ -104,4 +104,4 @@ const STRIPE_ELEMENTS_OPTIONS = {
   },
 };
 
-export { STRIPE_ELEMENTS_OPTIONS };
+;

@@ -784,4 +784,3 @@ export const ModelManager = () => {
   );
 };
 
-export default ModelManager;

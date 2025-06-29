@@ -284,4 +284,3 @@ export const GeneratorSettings = () => {
   );
 };
 
-export default GeneratorSettings;

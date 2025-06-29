@@ -284,4 +284,3 @@ export const DiagnosisSettings = () => {
   );
 };
 
-export default DiagnosisSettings;
