@@ -162,7 +162,6 @@ export const FunnelOptimizerForm = ({
               variant="outline" 
               onClick={() => setActiveTab("ad")}
               className="gap-2 touch-target"
-              className="touch-target"
               disabled={!canUseFeature || isAnalyzing}
             >
               <ArrowLeft className="h-4 w-4" />
