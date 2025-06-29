@@ -113,9 +113,18 @@ Deno.serve(async (req) => {
     }
 
     // Verificar permissões (se o usuário pode usar o serviço)
-    const { data: usageData, error: usageError } = await supabase.rpc("check_funnel_analysis_usage", {
-      user_uuid: user.id
-    }).catch(() => ({ data: [{ can_use: true }], error: null }));
+    let usageData, usageError;
+    try {
+      const result = await supabase.rpc("check_funnel_analysis_usage", {
+        user_uuid: user.id
+      });
+      usageData = result.data;
+      usageError = result.error;
+    } catch (error) {
+      console.error("Erro ao verificar uso:", error);
+      usageData = [{ can_use: true }];
+      usageError = null;
+    }
 
     if (usageError || (usageData && usageData[0] && !usageData[0].can_use)) {
       return new Response(
