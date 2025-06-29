@@ -303,7 +303,7 @@ export const PromptEditor = () => {
                   Novo Prompt
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Criar Novo Prompt</DialogTitle>
                   <DialogDescription>
@@ -349,7 +349,7 @@ export const PromptEditor = () => {
                       value={formData.content}
                       onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                       placeholder="Digite o prompt aqui..."
-                      className="min-h-[200px]"
+                      className="min-h-[180px] max-h-[300px] overflow-y-auto"
                     />
                   </div>
                   

@@ -204,7 +204,8 @@ export const ConfigurationForm = ({ configuration, onClose, onSave }: Configurat
               value={formData.system_prompt}
               onChange={(e) => setFormData(prev => ({ ...prev, system_prompt: e.target.value }))}
               placeholder="Digite o prompt do sistema..."
-              rows={4}
+              rows={3}
+              className="max-h-[200px]"
             />
           </div>
           

@@ -283,7 +283,7 @@ export const ProviderManager = () => {
 
       {/* Diálogo de Configuração */}
       <Dialog open={isConfigDialogOpen} onOpenChange={setIsConfigDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Configurar {selectedProvider?.display_name}</DialogTitle>
             <DialogDescription>
@@ -293,8 +293,8 @@ export const ProviderManager = () => {
           
           <div className="space-y-6">
             {/* Configuração da API */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Configuração da API</h3>
+            <div className="space-y-3">
+              <h3 className="text-md font-semibold">Configuração da API</h3>
               
               <div>
                 <Label htmlFor="api_key">API Key</Label>

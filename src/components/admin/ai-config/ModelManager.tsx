@@ -426,7 +426,7 @@ const ModelManager = () => {
 
         {/* Formulário de Modelo */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-4xl">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingModel ? "Editar Modelo" : "Novo Modelo"}
@@ -441,9 +441,15 @@ const ModelManager = () => {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Informações Básicas */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Informações Básicas</h3>
+                  <div className="col-span-2 flex items-center justify-between mb-2">
+                    <h2 className="text-xl font-semibold">Configurações do Modelo</h2>
+                  </div>
+                  
+                  {/* Grid com 2 colunas - tablet e desktop, 1 coluna em mobile */}
+                  <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Coluna 1: Informações Básicas */}
+                    <div className="space-y-4 border p-4 rounded-md bg-gray-50">
+                      <h3 className="text-md font-medium">Informações Básicas</h3>
                     
                     <FormField
                       control={form.control}
@@ -531,76 +537,11 @@ const ModelManager = () => {
                         </FormItem>
                       )}
                     />
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="supports_streaming"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Streaming</FormLabel>
-                              <FormDescription>
-                                Suporta respostas em stream
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="supports_vision"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Visão</FormLabel>
-                              <FormDescription>
-                                Suporta processamento de imagens
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="is_active"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">Modelo Ativo</FormLabel>
-                            <FormDescription>
-                              O modelo está disponível para uso
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
                   </div>
 
-                  {/* Parâmetros do Modelo */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Parâmetros e Custos</h3>
+                  {/* Coluna 2: Parâmetros do Modelo */}
+                  <div className="space-y-4 border p-4 rounded-md bg-gray-50">
+                    <h3 className="text-md font-medium">Parâmetros e Custos</h3>
 
                     <FormField
                       control={form.control}
@@ -650,26 +591,26 @@ const ModelManager = () => {
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="max_tokens"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tokens Máximos</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="4096"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
                     <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="max_tokens"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tokens Máximos</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="4096"
+                                {...field}
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
                       <FormField
                         control={form.control}
                         name="frequency_penalty"
@@ -711,9 +652,9 @@ const ModelManager = () => {
                           </FormItem>
                         )}
                       />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
+                    </div>                   
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
                         name="cost_per_token_input"
@@ -760,9 +701,73 @@ const ModelManager = () => {
                         )}
                       />
                     </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="supports_streaming"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">Streaming</FormLabel>
+                              <FormDescription>
+                                Suporta respostas em stream
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="supports_vision"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">Visão</FormLabel>
+                              <FormDescription>
+                                Suporta processamento de imagens
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <FormField
+                      control={form.control}
+                      name="is_active"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">Modelo Ativo</FormLabel>
+                            <FormDescription>
+                              O modelo está disponível para uso
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </div>
-
                 <div className="flex justify-end gap-2">
                   <Button
                     type="button"
