@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/features/auth";
+import { useAuth } from "@/features/auth";
 
 export const useAdGenerator = () => {
   const [productName, setProductName] = useState("");
@@ -10,6 +11,7 @@ export const useAdGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAds, setGeneratedAds] = useState<string[]>([]);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const { user } = useAuth();
   const { user } = useAuth();
 
   const saveToHistory = async (inputData: Record<string, unknown>, generatedAds: string[]) => {
@@ -36,11 +38,26 @@ export const useAdGenerator = () => {
           description: "Não foi possível salvar no histórico.",
           variant: "destructive",
         });
+        setIsGenerating(false);
       } else {
         toast({
           title: "Salvo no histórico!",
           description: "Os anúncios foram salvos no seu histórico.",
         });
+      }
+      
+      // Verificar se o usuário pode usar o serviço (verificar limite do plano)
+      if (user) {
+        const { data, error } = await supabase.rpc('check_feature_usage', {
+          user_uuid: user.id,
+          feature: 'generations'
+        });
+        
+        if (error) throw error;
+        
+        if (data && data[0] && !data[0].can_use) {
+          throw new Error('Você atingiu o limite de gerações do seu plano. Faça upgrade para continuar.');
+        }
       }
     } catch (error) {
       console.error('Error saving to history:', error);
@@ -75,6 +92,15 @@ export const useAdGenerator = () => {
       setGeneratedAds(mockAds);
 
       // Save to history
+      
+      // Incrementar contador de uso da funcionalidade
+      if (user) {
+        await supabase.rpc('increment_usage_counter', {
+          p_user_uuid: user.id,
+          p_feature_type: 'generations'
+        });
+      }
+      
       const inputData = {
         productName,
         productDescription,
@@ -90,6 +116,7 @@ export const useAdGenerator = () => {
       toast({
         title: "Erro ao gerar anúncios",
         description: "Tente novamente em alguns instantes.",
+        description: error instanceof Error ? error.message : "Tente novamente em alguns instantes.",
         variant: "destructive",
       });
     } finally {
