@@ -768,6 +768,8 @@ export const ModelManager = () => {
                     />
                   </div>
                 </div>
+                </div>
+                
                 <div className="flex justify-end gap-2">
                   <Button
                     type="button"
