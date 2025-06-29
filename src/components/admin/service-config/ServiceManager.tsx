@@ -47,16 +47,9 @@ interface Service {
 
 interface ServiceConfig {
   ai_models?: string[];
-  model_configs?: {
-    temperature?: number;
-    max_tokens?: number;
-    top_p?: number;
-    frequency_penalty?: number;
-    presence_penalty?: number;
-  };
-  request_limit?: number;
   cache_enabled?: boolean;
   cache_ttl?: number;
+  request_limit?: number;
   [key: string]: any;
 }
 
@@ -223,7 +216,8 @@ const ServiceManager = () => {
       configuration: {
         ai_models: [],
         request_limit: 100,
-        cache_enabled: true
+        cache_enabled: true,
+        cache_ttl: 86400
       },
       access_level: 'premium',
       created_at: '',
@@ -362,12 +356,11 @@ const ServiceManager = () => {
             </DialogHeader>
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="informacoes">Informações Básicas</TabsTrigger>
-                <TabsTrigger value="modelos">Configurações de IA</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-1">
+                <TabsTrigger value="informacoes">Informações e Configurações</TabsTrigger>
               </TabsList>
               
-              {/* Aba de Informações Básicas */}
+              {/* Aba de Informações Básicas e Configurações */}
               <TabsContent value="informacoes" className="space-y-4 mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -460,81 +453,64 @@ const ServiceManager = () => {
                   />
                   <Label htmlFor="is_active">Serviço Ativo</Label>
                 </div>
-              </TabsContent>
 
-              {/* Aba de Configurações de IA */}
-              <TabsContent value="modelos" className="space-y-4 mt-4">
-                <div>
-                  <h3 className="text-lg font-medium mb-4">Modelos de IA Disponíveis</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Selecione os modelos que estarão disponíveis para este serviço. As configurações como temperatura e tokens máximos
-                    serão utilizadas dos modelos já configurados no sistema.
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                    {aiModels?.filter(model => model.is_active).map((model) => (
-                      <div key={model.id} className="flex items-center p-3 rounded-md border">
-                        <Switch
-                          checked={(serviceToEdit.configuration.ai_models || []).includes(model.model_name)}
-                          onCheckedChange={(checked) => {
-                            const currentModels = serviceToEdit.configuration.ai_models || [];
-                            const updatedModels = checked
-                              ? [...currentModels, model.model_name]
-                              : currentModels.filter(m => m !== model.model_name);
-                            
-                            setServiceToEdit({
-                              ...serviceToEdit,
-                              configuration: {
-                                ...serviceToEdit.configuration,
-                                ai_models: updatedModels
-                              }
-                            });
-                          }}
-                        />
-                        <span className="ml-2">{model.model_name}</span>
+                {serviceToEdit.type === 'ai_service' && (
+                  <>
+                    <div>
+                      <h3 className="text-lg font-medium mb-4">Modelos de IA Disponíveis</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Selecione os modelos que estarão disponíveis para este serviço. As configurações como temperatura e tokens máximos
+                        serão utilizadas dos modelos já configurados no sistema.
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {aiModels?.filter(model => model.is_active).map((model) => (
+                          <div key={model.id} className="flex items-center p-3 rounded-md border">
+                            <Switch
+                              checked={(serviceToEdit.configuration.ai_models || []).includes(model.model_name)}
+                              onCheckedChange={(checked) => {
+                                const currentModels = serviceToEdit.configuration.ai_models || [];
+                                const updatedModels = checked
+                                  ? [...currentModels, model.model_name]
+                                  : currentModels.filter(m => m !== model.model_name);
+                                
+                                setServiceToEdit({
+                                  ...serviceToEdit,
+                                  configuration: {
+                                    ...serviceToEdit.configuration,
+                                    ai_models: updatedModels
+                                  }
+                                });
+                              }}
+                            />
+                            <span className="ml-2">{model.model_name}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-4">
-                    <Label htmlFor="request_limit">Limite por Requisição</Label>
-                    <Input
-                      id="request_limit"
-                      type="number"
-                      min="1"
-                      value={serviceToEdit.configuration.request_limit || 100}
-                      onChange={(e) => setServiceToEdit({
-                        ...serviceToEdit,
-                        configuration: {
-                          ...serviceToEdit.configuration,
-                          request_limit: parseInt(e.target.value)
-                        }
-                      })}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Número máximo de requisições por período (dia/mês)
-                    </p>
-                  </div>
-
-                  <div className="mt-4">
-                    <h3 className="font-medium mb-2">Configurações de Cache</h3>
-                    <div className="flex items-center space-x-2 mb-4">
-                      <Switch
-                        id="cache_enabled"
-                        checked={serviceToEdit.configuration.cache_enabled || false}
-                        onCheckedChange={(checked) => setServiceToEdit({
-                          ...serviceToEdit,
-                          configuration: {
-                            ...serviceToEdit.configuration,
-                            cache_enabled: checked
-                          }
-                        })}
-                      />
-                      <Label htmlFor="cache_enabled">Habilitar Cache</Label>
                     </div>
-                    
-                    {serviceToEdit.configuration.cache_enabled && (
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="cache_ttl">Tempo de Expiração do Cache (segundos)</Label>
+                        <Label htmlFor="request_limit">Limite por Requisição</Label>
+                        <Input
+                          id="request_limit"
+                          type="number"
+                          min="1"
+                          value={serviceToEdit.configuration.request_limit || 100}
+                          onChange={(e) => setServiceToEdit({
+                            ...serviceToEdit,
+                            configuration: {
+                              ...serviceToEdit.configuration,
+                              request_limit: parseInt(e.target.value)
+                            }
+                          })}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Número máximo de requisições por período (dia/mês)
+                        </p>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="cache_ttl">Tempo de Cache (segundos)</Label>
                         <Input
                           id="cache_ttl"
                           type="number"
@@ -547,14 +523,33 @@ const ServiceManager = () => {
                               cache_ttl: parseInt(e.target.value)
                             }
                           })}
+                          disabled={!serviceToEdit.configuration.cache_enabled}
                         />
                         <p className="text-xs text-gray-500 mt-1">
                           86400 = 24 horas, 3600 = 1 hora, 604800 = 1 semana
                         </p>
                       </div>
-                    )}
-                  </div>
-                </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2 mt-4">
+                      <Switch
+                        id="cache_enabled"
+                        checked={serviceToEdit.configuration.cache_enabled || false}
+                        onCheckedChange={(checked) => setServiceToEdit({
+                          ...serviceToEdit,
+                          configuration: {
+                            ...serviceToEdit.configuration,
+                            cache_enabled: checked
+                          }
+                        })}
+                      />
+                      <Label htmlFor="cache_enabled">Habilitar Cache</Label>
+                      <p className="text-xs text-gray-500 ml-2">
+                        Armazena resultados para reduzir chamadas à API e melhorar performance
+                      </p>
+                    </div>
+                  </>
+                )}
               </TabsContent>
             </Tabs>
 

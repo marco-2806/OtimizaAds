@@ -4,15 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { FunnelOptimizerConfig } from "@/types/funnel-optimizer";
 import { useQuery } from "@tanstack/react-query";
-import { GitCompare } from "lucide-react";
+import { Brain, Zap } from "lucide-react";
 
-export const FunnelOptimizerSettings = () => {
+export const GeneratorSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -38,15 +37,15 @@ export const FunnelOptimizerSettings = () => {
     },
   });
   
-  // Configurações do Laboratório de Otimização de Funil
-  const [funnelConfig, setFunnelConfig] = useState<FunnelOptimizerConfig>({
+  // Configurações do Gerador de Anúncios
+  const [generatorConfig, setGeneratorConfig] = useState({
     enabled: true,
     maxTokens: 2048,
     temperature: 0.7,
     cacheEnabled: true,
     cacheExpiryHours: 24,
     defaultModel: "",
-    promptTemplate: "Analise a coerência entre o seguinte anúncio e sua página de destino:\n\nANÚNCIO:\n\"{{adText}}\"\n\nPÁGINA DE DESTINO:\n\"{{landingPageText}}\"\n\nForneça a análise no seguinte formato JSON:\n{\n  \"funnelCoherenceScore\": número de 0 a 10 representando a pontuação de coerência,\n  \"adDiagnosis\": \"diagnóstico do anúncio\",\n  \"landingPageDiagnosis\": \"diagnóstico da página de destino\",\n  \"syncSuggestions\": [\"sugestão 1\", \"sugestão 2\", \"sugestão 3\", \"sugestão 4\"],\n  \"optimizedAd\": \"versão otimizada do anúncio para melhorar a coerência\"\n}"
+    promptTemplate: "Gere 5 anúncios persuasivos para o seguinte produto:\n\nNome do produto: {{productName}}\nDescrição: {{productDescription}}\nPúblico-alvo: {{targetAudience}}\n\nOs anúncios devem ser curtos, persuasivos e incluir emojis estratégicos.\nCada anúncio deve ter um gancho forte, benefícios claros e uma chamada para ação."
   });
 
   useEffect(() => {
@@ -62,17 +61,17 @@ export const FunnelOptimizerSettings = () => {
       const { data, error } = await supabase
         .from('app_settings')
         .select('key, value')
-        .eq('key', 'funnel_optimizer');
+        .eq('key', 'ad_generator');
       
       if (error) throw error;
       
       if (data && data.length > 0) {
-        setFunnelConfig(data[0].value as FunnelOptimizerConfig);
+        setGeneratorConfig(data[0].value as typeof generatorConfig);
       }
       
       toast({
         title: "Configurações carregadas",
-        description: "As configurações do otimizador de funil foram carregadas com sucesso."
+        description: "As configurações do gerador de anúncios foram carregadas com sucesso."
       });
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
@@ -92,9 +91,9 @@ export const FunnelOptimizerSettings = () => {
       
       // Preparar atualizações
       const updates = {
-        key: 'funnel_optimizer',
-        value: funnelConfig,
-        description: 'Configurações do Laboratório de Otimização de Funil'
+        key: 'ad_generator',
+        value: generatorConfig,
+        description: 'Configurações do Gerador de Anúncios'
       };
       
       // Salvar configurações
@@ -109,18 +108,18 @@ export const FunnelOptimizerSettings = () => {
       // Registrar no log de auditoria
       await supabase.from('audit_logs').insert({
         admin_user_id: (await supabase.auth.getUser()).data.user?.id,
-        action: 'funnel_optimizer_settings_updated',
+        action: 'ad_generator_settings_updated',
         details: { 
           timestamp: new Date().toISOString(),
-          enabled: funnelConfig.enabled,
-          maxTokens: funnelConfig.maxTokens,
-          temperature: funnelConfig.temperature
+          enabled: generatorConfig.enabled,
+          maxTokens: generatorConfig.maxTokens,
+          temperature: generatorConfig.temperature
         }
       });
       
       toast({
         title: "Configurações salvas",
-        description: "As configurações do otimizador de funil foram salvas com sucesso."
+        description: "As configurações do gerador de anúncios foram salvas com sucesso."
       });
     } catch (error) {
       console.error('Erro ao salvar configurações:', error);
@@ -147,62 +146,62 @@ export const FunnelOptimizerSettings = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <GitCompare className="h-5 w-5 text-blue-600" />
-            Configurações do Laboratório de Otimização de Funil
+            <Zap className="h-5 w-5 text-blue-600" />
+            Configurações do Gerador de Anúncios
           </CardTitle>
           <CardDescription>
-            Configure o comportamento do analisador de funil
+            Configure como o gerador de anúncios funciona
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="funnel_enabled">Recurso Ativo</Label>
+              <Label htmlFor="generator_enabled">Recurso Ativo</Label>
               <p className="text-sm text-gray-500">
-                Habilita ou desabilita o Laboratório de Otimização de Funil
+                Habilita ou desabilita o Gerador de Anúncios
               </p>
             </div>
             <Switch
-              id="funnel_enabled"
-              checked={funnelConfig.enabled}
-              onCheckedChange={(checked) => setFunnelConfig({...funnelConfig, enabled: checked})}
+              id="generator_enabled"
+              checked={generatorConfig.enabled}
+              onCheckedChange={(checked) => setGeneratorConfig({...generatorConfig, enabled: checked})}
             />
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="funnel_max_tokens">Tokens Máximos</Label>
+              <Label htmlFor="generator_max_tokens">Tokens Máximos</Label>
               <Input
-                id="funnel_max_tokens"
+                id="generator_max_tokens"
                 type="number"
                 min="512"
                 max="8192"
-                value={funnelConfig.maxTokens}
-                onChange={(e) => setFunnelConfig({...funnelConfig, maxTokens: parseInt(e.target.value)})}
+                value={generatorConfig.maxTokens}
+                onChange={(e) => setGeneratorConfig({...generatorConfig, maxTokens: parseInt(e.target.value)})}
               />
             </div>
             
             <div>
-              <Label htmlFor="funnel_temperature">Temperatura</Label>
+              <Label htmlFor="generator_temperature">Temperatura</Label>
               <Input
-                id="funnel_temperature"
+                id="generator_temperature"
                 type="number"
                 min="0"
                 max="2"
                 step="0.1"
-                value={funnelConfig.temperature}
-                onChange={(e) => setFunnelConfig({...funnelConfig, temperature: parseFloat(e.target.value)})}
+                value={generatorConfig.temperature}
+                onChange={(e) => setGeneratorConfig({...generatorConfig, temperature: parseFloat(e.target.value)})}
               />
             </div>
           </div>
           
           <div>
-            <Label htmlFor="funnel_default_model">Modelo Padrão</Label>
+            <Label htmlFor="generator_default_model">Modelo Padrão</Label>
             <Select 
-              value={funnelConfig.defaultModel || ""} 
-              onValueChange={(value) => setFunnelConfig({...funnelConfig, defaultModel: value})}
+              value={generatorConfig.defaultModel || ""} 
+              onValueChange={(value) => setGeneratorConfig({...generatorConfig, defaultModel: value})}
             >
-              <SelectTrigger id="funnel_default_model">
+              <SelectTrigger id="generator_default_model">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -218,47 +217,47 @@ export const FunnelOptimizerSettings = () => {
               </SelectContent>
             </Select>
             <p className="text-xs text-gray-500 mt-2">
-              Modelo de IA que será utilizado para analisar a coerência entre anúncios e páginas de destino
+              Modelo de IA que será utilizado para gerar anúncios
             </p>
           </div>
-
+          
           <div>
-            <Label htmlFor="funnel_prompt_template">Template de Prompt</Label>
+            <Label htmlFor="prompt_template">Template de Prompt</Label>
             <Textarea
-              id="funnel_prompt_template"
-              value={funnelConfig.promptTemplate}
-              onChange={(e) => setFunnelConfig({...funnelConfig, promptTemplate: e.target.value})}
+              id="prompt_template"
+              value={generatorConfig.promptTemplate}
+              onChange={(e) => setGeneratorConfig({...generatorConfig, promptTemplate: e.target.value})}
               rows={5}
             />
             <p className="text-xs text-gray-500 mt-2">
-              Use {{adText}} e {{landingPageText}} como variáveis que serão substituídas
+              Use {{productName}}, {{productDescription}} e {{targetAudience}} como variáveis que serão substituídas
             </p>
           </div>
           
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="funnel_cache_enabled">Cache Ativo</Label>
+              <Label htmlFor="generator_cache_enabled">Cache Ativo</Label>
               <p className="text-sm text-gray-500">
-                Habilita cache para análises de funil
+                Habilita cache para gerações de anúncios
               </p>
             </div>
             <Switch
-              id="funnel_cache_enabled"
-              checked={funnelConfig.cacheEnabled}
-              onCheckedChange={(checked) => setFunnelConfig({...funnelConfig, cacheEnabled: checked})}
+              id="generator_cache_enabled"
+              checked={generatorConfig.cacheEnabled}
+              onCheckedChange={(checked) => setGeneratorConfig({...generatorConfig, cacheEnabled: checked})}
             />
           </div>
           
           <div>
-            <Label htmlFor="funnel_cache_expiry_hours">Tempo de Expiração do Cache (horas)</Label>
+            <Label htmlFor="generator_cache_expiry_hours">Tempo de Expiração do Cache (horas)</Label>
             <Input
-              id="funnel_cache_expiry_hours"
+              id="generator_cache_expiry_hours"
               type="number"
               min="1"
               max="168"
-              value={funnelConfig.cacheExpiryHours}
-              onChange={(e) => setFunnelConfig({...funnelConfig, cacheExpiryHours: parseInt(e.target.value)})}
-              disabled={!funnelConfig.cacheEnabled}
+              value={generatorConfig.cacheExpiryHours}
+              onChange={(e) => setGeneratorConfig({...generatorConfig, cacheExpiryHours: parseInt(e.target.value)})}
+              disabled={!generatorConfig.cacheEnabled}
             />
           </div>
         </CardContent>
@@ -285,4 +284,4 @@ export const FunnelOptimizerSettings = () => {
   );
 };
 
-export default FunnelOptimizerSettings;
+export default GeneratorSettings;

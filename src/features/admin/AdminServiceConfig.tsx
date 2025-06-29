@@ -7,6 +7,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/hooks/use-toast";
 import { FunnelOptimizerSettings } from "@/components/admin/ai-config/FunnelOptimizerSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GeneratorSettings } from "@/components/admin/service-config/GeneratorSettings";
+import { DiagnosisSettings } from "@/components/admin/service-config/DiagnosisSettings";
 
 const AdminServiceConfig = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -84,16 +86,26 @@ const AdminServiceConfig = () => {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="services">Serviços</TabsTrigger>
-          <TabsTrigger value="funnel">Laboratório de Otimização de Funil</TabsTrigger>
+          <TabsTrigger value="gerador">Gerador de Anúncios</TabsTrigger>
+          <TabsTrigger value="diagnostico">Diagnóstico de Anúncios</TabsTrigger>
+          <TabsTrigger value="funil">Otimização de Funil</TabsTrigger>
         </TabsList>
 
         <TabsContent value="services">
           <ServiceManager />
         </TabsContent>
 
-        <TabsContent value="funnel">
+        <TabsContent value="gerador">
+          <GeneratorSettings />
+        </TabsContent>
+
+        <TabsContent value="diagnostico">
+          <DiagnosisSettings />
+        </TabsContent>
+
+        <TabsContent value="funil">
           <FunnelOptimizerSettings />
         </TabsContent>
       </Tabs>
@@ -110,7 +122,7 @@ const AdminServiceConfig = () => {
             <h3 className="font-semibold">Níveis de Acesso</h3>
             <p className="text-sm text-gray-600">
               Os serviços podem ter diferentes níveis de acesso dependendo do plano do usuário.
-              Configire corretamente para garantir que apenas usuários autorizados tenham acesso.
+              Configure corretamente para garantir que apenas usuários autorizados tenham acesso.
             </p>
           </div>
           

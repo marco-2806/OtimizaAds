@@ -8,6 +8,7 @@ export interface FunnelOptimizerConfig {
   cacheEnabled: boolean;
   cacheExpiryHours: number;
   defaultModel: string;
+  promptTemplate?: string;
 }
 
 /**
