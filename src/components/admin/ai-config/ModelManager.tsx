@@ -59,7 +59,7 @@ type ModelInsertData = {
   is_active?: boolean;
 };
 
-const ModelManager = () => {
+export const ModelManager = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingModel, setEditingModel] = useState<Record<string, unknown> | null>(null);
   const queryClient = useQueryClient();
@@ -837,6 +837,3 @@ const ModelManager = () => {
       </Dialog>
     </Card>
   );
-};
-
-export { ModelManager };
