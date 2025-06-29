@@ -48,8 +48,8 @@ interface Service {
 interface ServiceConfig {
   ai_models?: string[];
   model_configs?: {
-    temperature: number;
-    max_tokens: number;
+    temperature?: number;
+    max_tokens?: number;
     top_p?: number;
     frequency_penalty?: number;
     presence_penalty?: number;
@@ -57,14 +57,6 @@ interface ServiceConfig {
   request_limit?: number;
   cache_enabled?: boolean;
   cache_ttl?: number;
-  integrations?: {
-    [key: string]: {
-      enabled: boolean;
-      api_key?: string;
-      endpoint?: string;
-      organization_id?: string;
-    }
-  };
   [key: string]: any;
 }
 
@@ -72,7 +64,7 @@ interface AIModel {
   id: string;
   model_name: string;
   provider_data?: {
-    display_name: string;
+    display_name?: string;
   };
   provider?: string;
   temperature: number;
@@ -231,30 +223,14 @@ const ServiceManager = () => {
       configuration: {
         ai_models: ['gpt-4o'],
         model_configs: {
-          temperature: 0.7,
-          max_tokens: 2048,
-          top_p: 0.9,
-          frequency_penalty: 0,
-          presence_penalty: 0
+          temperature: undefined,
+          max_tokens: undefined,
+          top_p: undefined,
+          frequency_penalty: undefined,
+          presence_penalty: undefined
         },
         request_limit: 100,
-        cache_enabled: true,
-        cache_ttl: 86400, // 24 horas em segundos
-        integrations: {
-          openai: {
-            enabled: true,
-            api_key: '',
-            organization_id: ''
-          },
-          anthropic: {
-            enabled: false,
-            api_key: ''
-          },
-          google: {
-            enabled: false,
-            api_key: ''
-          }
-        }
+        cache_enabled: true
       },
       access_level: 'premium',
       created_at: '',
@@ -385,7 +361,7 @@ const ServiceManager = () => {
           <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {serviceToEdit.id ? `Editar Serviço: ${serviceToEdit.name}` : "Novo Serviço"}
+                {serviceToEdit.id ? `Editar Serviço: ${serviceToEdit.name}` : "Criar Serviço"}
               </DialogTitle>
               <DialogDescription>
                 {serviceToEdit.id ? "Edite as configurações do serviço existente." : "Configure as informações do novo serviço."}
@@ -393,9 +369,10 @@ const ServiceManager = () => {
             </DialogHeader>
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="informacoes">Informações Básicas</TabsTrigger>
                 <TabsTrigger value="modelos">Configurações de IA</TabsTrigger>
+                <TabsTrigger value="cache">Cache e Performance</TabsTrigger>
               </TabsList>
               
               {/* Aba de Informações Básicas */}
@@ -497,7 +474,10 @@ const ServiceManager = () => {
               <TabsContent value="modelos" className="space-y-4 mt-4">
                 <div>
                   <h3 className="text-lg font-medium mb-4">Modelos de IA Disponíveis</h3>
-                  
+                  <p className="text-sm text-gray-600 mb-4">
+                    Selecione os modelos que estarão disponíveis para este serviço. As configurações como temperatura e tokens máximos
+                    serão utilizadas dos modelos já configurados no sistema.
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                     {aiModels?.filter(model => model.is_active).map((model) => (
                       <div key={model.id} className="flex items-center p-3 rounded-md border">
@@ -523,61 +503,6 @@ const ServiceManager = () => {
                     ))}
                   </div>
                   
-                  <p className="text-xs text-gray-500 mt-2">
-                    Selecione os modelos de IA disponíveis para este serviço
-                  </p>
-                </div>
-
-                <div className="mt-6">
-                  <h3 className="text-lg font-medium mb-3">Configurações de Modelo</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="max_tokens">Tokens Máximos</Label>
-                      <Input
-                        id="max_tokens"
-                        type="number"
-                        min="1"
-                        value={serviceToEdit.configuration.model_configs?.max_tokens || 2048}
-                        onChange={(e) => setServiceToEdit({
-                          ...serviceToEdit,
-                          configuration: {
-                            ...serviceToEdit.configuration,
-                            model_configs: {
-                              ...(serviceToEdit.configuration.model_configs || {}),
-                              max_tokens: parseInt(e.target.value)
-                            }
-                          }
-                        })}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="temperature">Temperatura</Label>
-                      <Input
-                        id="temperature"
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max="2"
-                        value={serviceToEdit.configuration.model_configs?.temperature || 0.7}
-                        onChange={(e) => setServiceToEdit({
-                          ...serviceToEdit,
-                          configuration: {
-                            ...serviceToEdit.configuration,
-                            model_configs: {
-                              ...(serviceToEdit.configuration.model_configs || {}),
-                              temperature: parseFloat(e.target.value)
-                            }
-                          }
-                        })}
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Controla a aleatoriedade das respostas (0-2)
-                      </p>
-                    </div>
-                  </div>
-                  
                   <div className="mt-4">
                     <Label htmlFor="request_limit">Limite por Requisição</Label>
                     <Input
@@ -598,226 +523,12 @@ const ServiceManager = () => {
                     </p>
                   </div>
                 </div>
+              </TabsContent>
 
-                <div className="mt-6">
-                  <h3 className="text-lg font-medium mb-3">Integrações com APIs Externas</h3>
-                  
-                  <div className="space-y-4">
-                    {/* OpenAI */}
-                    <Card>
-                      <CardContent className="pt-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Brain className="h-5 w-5 text-blue-600" />
-                            <div>
-                              <h4 className="font-medium">OpenAI API</h4>
-                              <p className="text-sm text-gray-500">Integração com a API da OpenAI</p>
-                            </div>
-                          </div>
-                          <Switch
-                            checked={serviceToEdit.configuration.integrations?.openai?.enabled || false}
-                            onCheckedChange={(checked) => setServiceToEdit({
-                              ...serviceToEdit,
-                              configuration: {
-                                ...serviceToEdit.configuration,
-                                integrations: {
-                                  ...(serviceToEdit.configuration.integrations || {}),
-                                  openai: {
-                                    ...(serviceToEdit.configuration.integrations?.openai || {}),
-                                    enabled: checked
-                                  }
-                                }
-                              }
-                            })}
-                          />
-                        </div>
-                        
-                        {serviceToEdit.configuration.integrations?.openai?.enabled && (
-                          <div className="mt-4 space-y-4 pl-7">
-                            <div>
-                              <Label htmlFor="openai_api_key">API Key</Label>
-                              <div className="flex gap-2">
-                                <Input
-                                  id="openai_api_key"
-                                  type="password"
-                                  value={serviceToEdit.configuration.integrations?.openai?.api_key || ""}
-                                  onChange={(e) => setServiceToEdit({
-                                    ...serviceToEdit,
-                                    configuration: {
-                                      ...serviceToEdit.configuration,
-                                      integrations: {
-                                        ...(serviceToEdit.configuration.integrations || {}),
-                                        openai: {
-                                          ...(serviceToEdit.configuration.integrations?.openai || {}),
-                                          api_key: e.target.value
-                                        }
-                                      }
-                                    }
-                                  })}
-                                  placeholder="sk-..."
-                                />
-                                <Button variant="outline" size="icon">
-                                  <Key className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="openai_org_id">Organization ID (opcional)</Label>
-                              <Input
-                                id="openai_org_id"
-                                value={serviceToEdit.configuration.integrations?.openai?.organization_id || ""}
-                                onChange={(e) => setServiceToEdit({
-                                  ...serviceToEdit,
-                                  configuration: {
-                                    ...serviceToEdit.configuration,
-                                    integrations: {
-                                      ...(serviceToEdit.configuration.integrations || {}),
-                                      openai: {
-                                        ...(serviceToEdit.configuration.integrations?.openai || {}),
-                                        organization_id: e.target.value
-                                      }
-                                    }
-                                  }
-                                })}
-                                placeholder="org-..."
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                    
-                    {/* Anthropic */}
-                    <Card>
-                      <CardContent className="pt-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Brain className="h-5 w-5 text-purple-600" />
-                            <div>
-                              <h4 className="font-medium">Anthropic API</h4>
-                              <p className="text-sm text-gray-500">Integração com a API da Anthropic (Claude)</p>
-                            </div>
-                          </div>
-                          <Switch
-                            checked={serviceToEdit.configuration.integrations?.anthropic?.enabled || false}
-                            onCheckedChange={(checked) => setServiceToEdit({
-                              ...serviceToEdit,
-                              configuration: {
-                                ...serviceToEdit.configuration,
-                                integrations: {
-                                  ...(serviceToEdit.configuration.integrations || {}),
-                                  anthropic: {
-                                    ...(serviceToEdit.configuration.integrations?.anthropic || {}),
-                                    enabled: checked
-                                  }
-                                }
-                              }
-                            })}
-                          />
-                        </div>
-                        
-                        {serviceToEdit.configuration.integrations?.anthropic?.enabled && (
-                          <div className="mt-4 space-y-4 pl-7">
-                            <div>
-                              <Label htmlFor="anthropic_api_key">API Key</Label>
-                              <div className="flex gap-2">
-                                <Input
-                                  id="anthropic_api_key"
-                                  type="password"
-                                  value={serviceToEdit.configuration.integrations?.anthropic?.api_key || ""}
-                                  onChange={(e) => setServiceToEdit({
-                                    ...serviceToEdit,
-                                    configuration: {
-                                      ...serviceToEdit.configuration,
-                                      integrations: {
-                                        ...(serviceToEdit.configuration.integrations || {}),
-                                        anthropic: {
-                                          ...(serviceToEdit.configuration.integrations?.anthropic || {}),
-                                          api_key: e.target.value
-                                        }
-                                      }
-                                    }
-                                  })}
-                                  placeholder="sk-ant-..."
-                                />
-                                <Button variant="outline" size="icon">
-                                  <Key className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                    
-                    {/* Google AI API */}
-                    <Card>
-                      <CardContent className="pt-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Brain className="h-5 w-5 text-green-600" />
-                            <div>
-                              <h4 className="font-medium">Google AI API</h4>
-                              <p className="text-sm text-gray-500">Integração com a API do Google AI (Gemini)</p>
-                            </div>
-                          </div>
-                          <Switch
-                            checked={serviceToEdit.configuration.integrations?.google?.enabled || false}
-                            onCheckedChange={(checked) => setServiceToEdit({
-                              ...serviceToEdit,
-                              configuration: {
-                                ...serviceToEdit.configuration,
-                                integrations: {
-                                  ...(serviceToEdit.configuration.integrations || {}),
-                                  google: {
-                                    ...(serviceToEdit.configuration.integrations?.google || {}),
-                                    enabled: checked
-                                  }
-                                }
-                              }
-                            })}
-                          />
-                        </div>
-                        
-                        {serviceToEdit.configuration.integrations?.google?.enabled && (
-                          <div className="mt-4 space-y-4 pl-7">
-                            <div>
-                              <Label htmlFor="google_api_key">API Key</Label>
-                              <div className="flex gap-2">
-                                <Input
-                                  id="google_api_key"
-                                  type="password"
-                                  value={serviceToEdit.configuration.integrations?.google?.api_key || ""}
-                                  onChange={(e) => setServiceToEdit({
-                                    ...serviceToEdit,
-                                    configuration: {
-                                      ...serviceToEdit.configuration,
-                                      integrations: {
-                                        ...(serviceToEdit.configuration.integrations || {}),
-                                        google: {
-                                          ...(serviceToEdit.configuration.integrations?.google || {}),
-                                          api_key: e.target.value
-                                        }
-                                      }
-                                    }
-                                  })}
-                                  placeholder="AIza..."
-                                />
-                                <Button variant="outline" size="icon">
-                                  <Key className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-                
-                <div className="mt-6">
-                  <h3 className="text-lg font-medium mb-3">Cache e Performance</h3>
+              {/* Aba de Cache e Performance */}
+              <TabsContent value="cache" className="space-y-4 mt-4">
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Configurações de Cache</h3>
                   
                   <div className="flex items-center space-x-2">
                     <Switch
